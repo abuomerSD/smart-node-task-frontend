@@ -20,27 +20,26 @@ export default {
 </script>
 
 <template>
-    <div>
-        
+    <div class="row">
+        <!-- <h5>{{ category.name }} Products</h5> -->
+        <span v-for="product in products" :key="product.id" class="col-lg-4 col-md-2 col-sm-6">
+            <b-card
+                :title="product.name"
+                :img-src="imgUrl + product.img"
+                img-alt="Image"
+                img-top
+                tag="article"
+                style="max-width: 20rem;"
+                class="product-card"
+                @click="addToCart(product)"
+            >
+                <b-card-text>
+                {{ product.price }}$
+                </b-card-text>
+            </b-card>
+        </span>
     </div>
-    <span v-for="product in products" :key="product.id">
-        <h5>{{ category.name }} Products</h5>
-        <b-card
-            :title="product.name"
-            :img-src="imgUrl + product.img"
-            img-alt="Image"
-            img-top
-            tag="article"
-            style="max-width: 20rem;"
-            class="product-card"
-            @click="addToCart(product)"
-        >
-            <b-card-text>
-            {{ product.price }}$
-            </b-card-text>
-        </b-card>
-
-    </span>
+    
 </template>
 
 <style>

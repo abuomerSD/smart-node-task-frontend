@@ -16,7 +16,7 @@ export default {
     }
   },
   methods: {
-    refreshTransactions() {
+    refreshOrderDetails() {
         this.$refs.transactionComp.paginateOrderDetails();
     }
   }
@@ -28,7 +28,7 @@ export default {
         <div>
             <b-tabs content-class="mt-3">
                 <b-tab title="Cart" active>
-                    <CartComponent @refreshTransactions="refreshTransactions" />
+                    <CartComponent @refreshOrderDetails="refreshOrderDetails" />
                 </b-tab>
                 <b-tab title="Order Details">
                     <OrderDetailsComponent ref="transactionComp" />

@@ -188,10 +188,10 @@ export default {
                     :per-page="categoriesLimit" 
                     aria-controls="my-table"
             ></b-pagination>
+            <ProductListComponent @add-to-cart="addToCart" :products="products" :category="selectedCategory"/>
                     
             <div class="row">
                 <div class="col">
-                    <ProductListComponent @add-to-cart="addToCart" :products="products" :category="selectedCategory"/>
                 </div>
             </div>
             <b-pagination

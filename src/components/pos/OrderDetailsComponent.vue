@@ -14,6 +14,17 @@ export default {
             modalImage: '',
             selectedOrder: {},
             orderTotal: 0,
+            sale_credit_notes : {
+                sale_order_id: null,
+                amount_returned: null,
+                sale_credit_note_details: [
+                    {
+                        sale_credit_note_id: null,
+                        sale_order_detail_id: null,
+                        qty: null,
+                    }
+                ]
+            }
         }
     },
     methods: {
@@ -35,9 +46,11 @@ export default {
             this.modalImage = this.imgUrl + image;
             console.log('this.modalImage', this.modalImage);
         },
-        calculateOrderTotal(selectedOrder) {
+        calculateOrderTotal(selectedOrder)
+        {
             this.orderTotal = 0;
-            selectedOrder.sale_order_details.forEach((detail) => {
+            selectedOrder.sale_order_details.forEach((detail) =>
+            {
                 this.orderTotal += detail.price * detail.qty;
             });
         },
@@ -47,6 +60,14 @@ export default {
             console.log(this.selectedOrder);
             this.calculateOrderTotal(this.selectedOrder);
         },
+        fullReturn(sale_credit_notes, sale_order_id){
+            this.sale_credit_notes.sale_order_id = sale_order_id;
+            this.sale_credit_notes.amount_returned = this.orderTotal;
+            console.log(sale_credit_notes);
+        },
+        partialReturn(sale_credit_notes){
+            console.log(sale_credit_notes);
+        }
     },
     async mounted()
     {
@@ -79,17 +100,16 @@ export default {
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col">#</th>
                     <th scope="col">Id</th>
                     <th scope="col">Date Created</th>
                     <th scope="col">Date Updated</th>
                     <th scope="col">Recipet Image / Number</th>
                     <th scope="col">Show Details</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="(order, index) in OrderDetails" :key="index">
-                    <th scope="row">{{ index + 1 }}</th>
                     <td>{{ order.id }}</td>
                     <td>{{ order.created }}</td>
                     <td>{{ order.updated }}</td>
@@ -100,6 +120,10 @@ export default {
                     <td><a href="javascript:void(0)"><i class="bx bx-info-circle bx-sm" data-bs-toggle="modal"
                                 data-bs-target="#order-details-modal" @click="setSelectedOrderDetails(order)"></i></a>
                     </td>
+                    <td><button class="btn btn-danger m-1" @click="setSelectedOrderDetails(order)"
+                            data-bs-toggle="modal" data-bs-target="#full-return-modal">Full Return</button><button
+                            class="btn btn-danger" @click="setSelectedOrderDetails(order)" data-bs-toggle="modal"
+                            data-bs-target="#partial-return-modal">Partial Return</button></td>
                 </tr>
             </tbody>
         </table>
@@ -125,11 +149,11 @@ export default {
     <!-- Image Modal End -->
 
     <!-- Order Details Modal Start -->
-    <div class="modal" tabindex="-1" id="order-details-modal">
-        <div class="modal-dialog">
+    <div class="modal fade" tabindex="-1" id="order-details-modal">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Order Details #{{ selectedOrder.id }}</h5>
+                    <h5 class="modal-title">Order No #{{ selectedOrder.id }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -148,9 +172,10 @@ export default {
                             <tr v-for="(detail, index) in selectedOrder.sale_order_details" :key="index">
                                 <th scope="row">{{ index + 1 }}</th>
                                 <td>{{ detail.product.name }}</td>
-                                <td><img :src="imgUrl + detail.product.img" alt="image" class="order-details-image"></td>
-                                <td>{{detail.qty}}</td>
-                                <td>{{detail.price}}</td>
+                                <td><img :src="imgUrl + detail.product.img" alt="image" class="order-details-image">
+                                </td>
+                                <td>{{ detail.qty }}</td>
+                                <td>{{ detail.price }}</td>
                                 <td>{{ detail.price * detail.qty }}</td>
                             </tr>
                         </tbody>
@@ -164,6 +189,78 @@ export default {
         </div>
     </div>
     <!-- Order Details Modal End -->
+
+    <!-- Full Return Modal Start -->
+    <div class="modal fade" id="full-return-modal" tabindex="-1" aria-labelledby="full-return-modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="full-return-modal-label">Full Return Order #{{ selectedOrder.id }}
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>Total: {{ orderTotal }}$</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" @click="fullReturn(this.sale_credit_notes, selectedOrder.id)">Return Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Full Return Modal End -->
+
+    <!-- Partial Return Modal Start -->
+    <div class="modal fade" id="partial-return-modal" tabindex="-1" aria-labelledby="partial-return-modal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="partial-return-modal-label">Partial Return Order #{{
+                        selectedOrder.id }}
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Product Name</th>
+                                    <th scope="col">Poduct Image</th>
+                                    <th scope="col">Product Quantity</th>
+                                    <th scope="col">Return Quantity</th>
+                                    <th scope="col">Product Price</th>
+                                    <th scope="col">Product Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(detail, index) in selectedOrder.sale_order_details" :key="index">
+                                    <th scope="row">{{ index + 1 }}</th>
+                                    <td>{{ detail.product.name }}</td>
+                                    <td><img :src="imgUrl + detail.product.img" alt="image" class="order-details-image">
+                                    </td>
+                                    <td>{{ detail.qty }}</td>
+                                    <td><input type="number" value="0" class="form-control" min="0"></td>
+                                    <td>{{ detail.price }}</td>
+                                    <td>{{ detail.price * detail.qty }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4>Total: {{ orderTotal }}$</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" @click="partialReturn(this.sale_credit_notes)" data-bs-dismiss="modal">Return Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Partial Return Modal End -->
 
 </template>
 
