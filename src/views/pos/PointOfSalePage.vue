@@ -2,14 +2,14 @@
 import Layout from "../../layouts/main";
 import PageHeader from "@/components/page-header";
 import CartComponent from "../../components/pos/CartComponent.vue";
-import TransactionComponent from "../../components/pos/TransactionComponent.vue";
+import OrderDetailsComponent from "../../components/pos/OrderDetailsComponent.vue";
 
 
 /**
  * Starter component
  */
 export default {
-  components: { Layout, PageHeader, TransactionComponent, CartComponent },
+  components: { Layout, PageHeader, OrderDetailsComponent, CartComponent },
   data() {
     return {
 
@@ -17,7 +17,7 @@ export default {
   },
   methods: {
     refreshTransactions() {
-        this.$refs.transactionComp.getTransactions();
+        this.$refs.transactionComp.paginateOrderDetails();
     }
   }
 };
@@ -30,8 +30,8 @@ export default {
                 <b-tab title="Cart" active>
                     <CartComponent @refreshTransactions="refreshTransactions" />
                 </b-tab>
-                <b-tab title="Transactions">
-                    <TransactionComponent ref="transactionComp" />
+                <b-tab title="Order Details">
+                    <OrderDetailsComponent ref="transactionComp" />
                 </b-tab>
             </b-tabs>
         </div>

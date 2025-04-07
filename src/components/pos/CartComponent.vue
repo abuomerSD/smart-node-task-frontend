@@ -9,26 +9,30 @@ export default {
             categories: [],
             products: [],
             cartProducts: [],
-            transactions: [],
+            orderDetails: [],
             productsPage: 1,
             productsLimit: 5,
             categoriesPage: 1,
             categoriesLimit: 5,
-            total_categories_pages: 3,
-            allCategoriesLength: 0,
+            total_categories: 0,
+            total_categories_pages: 0,
+            total_products: 0,
+            total_products_pages : 0,
             cartTotal: 0,
             showRecipetNumberInput: false,
             showRecipetImageInput: false,
+            selectedCategory: null,
         }
     },
     async mounted() {
-        this.total_categories_pages = Math.round(this.allCategoriesLength / this.categoriesLimit);
         await this.categoriesPaginate(this.categoriesPage);
-
+        console.log('this.total_categories_pages', this.total_categories_pages);
+        console.log('this.total_categories', this.total_categories);
+        console.log('this.categoriesLimit', this.categoriesLimit);
     },
     methods: {
-        refreshTransactions() {
-            this.$emit('refreshTransactions');
+        refreshOrderDetails() {
+            this.$emit('refreshOrderDetails');
         },
         toggleRecipetNumber(){
             this.showRecipetNumberInput = !this.showRecipetNumberInput;
@@ -55,23 +59,25 @@ export default {
             this.calculateTotals();
         },
         async categoriesPaginate(page) {
-            console.log(page);
+            console.log('page', page);
             await this.http.get('categories/paginate', { page: this.categoriesPage , limit: this.categoriesLimit }).then((res) => {
-                
                 this.categories = res.data
-                this.total_categories_pages = res.tot
-            })
+                this.total_categories = res.tot;
+                this.total_categories_pages = Math.ceil(this.total_categories / this.categoriesLimit);
+            });
         },
-        async getCategories(){
+        async getCategoriesCount(){
             await this.http.get('categories').then((res)=>{
-            this.allCategoriesLength = res.data.length;
-            this.total_categories_pages = res.tot
-            }) 
+            this.total_categories = res.data.length;
+            });
         },
-        showCategoryProducts(id){
-            this.http.get(`products/paginate`,{category_id: id, page: this.productsPage, limit: this.productsLimit}).then((res) => {
+        showCategoryProducts(category, productsPage){
+            this.selectedCategory = category;
+            this.total_products_pages = 0;
+            this.http.get(`products/paginate`,{category_id: category.id, page: productsPage, limit: this.productsLimit}).then((res) => {
                 this.products = res.data;
-                this.tot_pages = res.tot
+                this.total_products = res.tot;
+                this.total_products_pages = Math.ceil(this.total_products / this.productsLimit);
             });
         },
         calculateTotals() {
@@ -113,7 +119,7 @@ export default {
                         this.$toast.success("Payment successful");
                         console.log(res);
                         this.$refs.RecipetNumberInput.value = '';
-                        this.refreshTransactions();
+                        this.refreshOrderDetails();
                     } else {
                         this.$toast.error("Payment failed");
                     }
@@ -131,7 +137,7 @@ export default {
                         this.$toast.success("Payment successful");
                         console.log(res);   
                         this.$refs.RecipetImageInput.value = null;
-                        this.refreshTransactions();
+                        this.refreshOrderDetails();
                     } else {
                         this.$toast.error("Payment failed");
                     }
@@ -158,7 +164,10 @@ export default {
     watch: {
         categoriesPage: function (val) {
             this.categoriesPaginate(val);
-        }
+        },
+        productsPage: function (productsPage) {
+            this.showCategoryProducts(this.selectedCategory, productsPage);
+        },
     }
 
 }
@@ -167,17 +176,34 @@ export default {
 <template>
     
     <div class="row">
+        <!-- Categories Start -->
         <div class="col-lg-7 col-md-12">
             <h4>Categories</h4>
-            <button v-for="category in categories" :key="category.id" class="btn-category" @click="showCategoryProducts(category.id)">{{ category.name }}</button>
+            
+            <button v-for="category in categories" :key="category.id" class="btn-category" @click="showCategoryProducts(category, productsPage)">{{ category.name }}</button>
             <b-pagination
-                v-model="categoriesPage"
-                :total-rows="total_categories_pages"
-                :per-page="categoriesLimit"
-                aria-controls="my-table"
+                    v-if="total_categories_pages > 1"
+                    v-model="categoriesPage"
+                    :total-rows="total_categories"
+                    :per-page="categoriesLimit" 
+                    aria-controls="my-table"
             ></b-pagination>
-            <ProductListComponent @add-to-cart="addToCart" :products="products"/>
+                    
+            <div class="row">
+                <div class="col">
+                    <ProductListComponent @add-to-cart="addToCart" :products="products" :category="selectedCategory"/>
+                </div>
+            </div>
+            <b-pagination
+            v-if="total_products_pages > 1"
+            v-model="productsPage"
+            :total-rows="total_products"
+            :per-page="productsLimit"
+            aria-controls="my-table"
+            ></b-pagination>
         </div>
+        <!-- Categories End -->
+        <!-- Invoice Start -->
         <div class="col-lg-5 col-md-12">
             <h4>Invoice</h4>
             <table class="table">
@@ -205,20 +231,20 @@ export default {
                         <td><a href="javascript:void(0)" @click="removeFromCart(product)"><i class='bx bxs-trash bx-sm' style="color: red;"></i></a></td>
                     </tr>
                 </tbody>
-                </table>
-                <div class="totals">
-                    <h5>Total: {{ cartTotal }}$</h5>
-                    <button class="btn btn-danger" @click="clearCart">Clear Cart</button>
-                    <!-- <button class="btn btn-primary m-3" @click="pay">Pay</button> -->
+            </table>
+            <div class="totals">
+                <h5>Total: {{ cartTotal }}$</h5>
+                <button class="btn btn-danger" @click="clearCart">Clear Cart</button>
+                <!-- <button class="btn btn-primary m-3" @click="pay">Pay</button> -->
                 
-                    <b-button v-b-modal.Pay-Modal class="btn btn-primary m-3" style="background-color: #02520a; color: white">Pay</b-button>
-
-                    <b-modal id="Pay-Modal" title="Confirm Payment" ok-title="Pay" cancel-title="Cancel" @ok="pay">
-                        <div>
-                            <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
-                                <b-form-radio @click="toggleRecipetNumber" :aria-describedby="ariaDescribedby" name="some-radios" value="A">Pay Using Recipet Number</b-form-radio>
-                                <b-form-radio @click="toggleRecipetImage" :aria-describedby="ariaDescribedby" name="some-radios" value="B">Pay Using Recipet Image</b-form-radio>
-                            </b-form-group>
+                <b-button v-b-modal.Pay-Modal class="btn btn-primary m-3" style="background-color: #02520a; color: white">Pay</b-button>
+                
+                <b-modal id="Pay-Modal" title="Confirm Payment" ok-title="Pay" cancel-title="Cancel" @ok="pay">
+                    <div>
+                        <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
+                            <b-form-radio @click="toggleRecipetNumber" :aria-describedby="ariaDescribedby" name="some-radios" value="A">Pay Using Recipet Number</b-form-radio>
+                            <b-form-radio @click="toggleRecipetImage" :aria-describedby="ariaDescribedby" name="some-radios" value="B">Pay Using Recipet Image</b-form-radio>
+                        </b-form-group>
                         </div>
                         <div v-show="showRecipetNumberInput" class="m-2">
                             <input type="text" placeholder="Recipet Number" class="form-control" ref="RecipetNumberInput">
@@ -229,24 +255,10 @@ export default {
                     </b-modal>
                     
                 </div>
-        </div>
-        <!-- Toast start -->
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" ref="toast">
-                <div class="toast-header">
-                    <img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Ftgwdlpkagzhvgb22dgdp.png" class="rounded me-2" alt="image">
-                    <strong class="me-auto">Bootstrap</strong>
-                    <small>11 mins ago</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" ref="toastBody">
-                    Hello, world! This is a toast message.
-                </div>
             </div>
-        </div>
-        <!-- Toast end -->
+            <!-- Invoice End -->
     </div>
-
+    
 </template>
 
 <style>

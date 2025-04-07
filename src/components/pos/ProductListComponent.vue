@@ -1,7 +1,7 @@
 <script>
 import { useAuthStore } from "@/state/pinia.js";
 export default {
-    props: ['products'],
+    props: ['products', 'category'],
     data() {
         return {
             imgUrl: '',
@@ -20,8 +20,11 @@ export default {
 </script>
 
 <template>
+    <div>
+        
+    </div>
     <span v-for="product in products" :key="product.id">
-              
+        <h5>{{ category.name }} Products</h5>
         <b-card
             :title="product.name"
             :img-src="imgUrl + product.img"
