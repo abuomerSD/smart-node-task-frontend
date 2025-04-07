@@ -1,0 +1,10 @@
+{
+    "title" : "products",
+    "add": "Add product",
+    "edit": "Edit product",
+    "delete": "Delete product",
+    "cancel": "cancel",
+    "name" : "product name",
+    "image": "product image",
+    "price": "product price"
+}

@@ -1,0 +1,91 @@
+{
+ "search": {
+      "text": "بحث..."
+    },
+    "dropdown": {
+      "megamenu": {
+        "text": "القائمة الضخمة",
+        "uicontent": {
+          "title": "مكونات واجهة المستخدم",
+          "list": {
+            "lightbox": "صندوق مضئ",
+            "rangeslider": "شريط التمرير",
+            "sweetalert": "تنبيه لطيف",
+            "rating": "تقييم",
+            "forms": "نماذج",
+            "tables": "الجداول",
+            "charts": "الرسوم البيانية"
+          }
+        },
+        "application": {
+          "title": "التطبيقات",
+          "list": {
+            "ecommerce": "التجارة الإلكترونية",
+            "calendar": "التقويم",
+            "email": "البريد الإلكتروني",
+            "projects": "المشاريع",
+            "tasks": "مهام",
+            "contacts": "جهات الاتصال"
+          }
+        },
+        "extrapages": {
+          "title": "صفحات اضافية",
+          "list": {
+            "lightsidebar": "شريط جانبي خفيف",
+            "compactsidebar": "شريط جانبي مضغوط",
+            "horizontallayout": "التخطيط الأفقي",
+            "maintenance": "اعمال صيانة",
+            "comingsoon": "قريبا",
+            "timeline": "الجدول الزمني",
+            "faqs": "الأسئلة الشائعة"
+          }
+        }
+      },
+      "site": {
+        "list": {
+          "github": "جيثب",
+          "bitbucket": "Bitbucket",
+          "dribbble": "المراوغة",
+          "dropbox": "بصندوق الإسقاط",
+          "mailchimp": "بريد الشمبانزي",
+          "slack": "تثاقل"
+        }
+      },
+      "notification": {
+        "badge": "3",
+        "text": "إشعارات",
+        "subtext": "عرض الكل",
+        "order": {
+          "title": "تم تقديم طلبك",
+          "text": "إذا دمجت عدة لغات القواعد",
+          "time": "قبل 3 دقائق"
+        },
+        "james": {
+          "title": "جيمس لومير",
+          "text": "سيبدو الأمر مثل اللغة الإنجليزية المبسطة.",
+          "time": "منذ 1 ساعة"
+        },
+        "item": {
+          "title": "يتم شحن البند الخاص بك",
+          "text": "إذا دمجت عدة لغات القواعد",
+          "time": "قبل 3 دقائق"
+        },
+        "salena": {
+          "title": "سالينا لايفيلد",
+          "text": "بصفتي صديقًا متشككًا في كامبريدج لأعمال الغرب.",
+          "time": "منذ 1 ساعة"
+        },
+        "button": "تحميل المزيد.."
+      },
+      "henry": {
+        "text": "هنري",
+        "list": {
+          "profile": "الملف الشخصي",
+          "mywallet": "محفظتي",
+          "settings": "إعدادات",
+          "lockscreen": "اقفل الشاشة",
+          "logout": "تسجيل خروج"
+        }
+      }
+    }   
+}
