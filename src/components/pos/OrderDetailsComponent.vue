@@ -14,7 +14,9 @@ export default {
             modalImage: '',
             selectedOrder: {},
             orderTotal: 0,
-            sale_credit_notes : {
+            partialReturnTotal: 0,
+            tempQty: [0, 0, 0],
+            sale_credit_notes: {
                 sale_order_id: null,
                 amount_returned: null,
                 sale_credit_note_details: [
@@ -28,6 +30,17 @@ export default {
         }
     },
     methods: {
+        calculatePartialReturnTotal()
+        {
+            this.partialReturnTotal = 0;
+            this.selectedOrder.sale_order_details.forEach((element) =>
+            {
+                if(!element.newQty) {
+                    element.newQty = 0;
+                }
+                this.partialReturnTotal += element.price * element.newQty;
+            });
+        },
         async paginateOrderDetails(page)
         {
             console.log("page", page);
@@ -39,6 +52,7 @@ export default {
 
                 // Calculate total pages
                 this.total_pages = Math.ceil(this.total_rows / this.limit);
+                this.total_pages = res.tot;
             });
         },
         setModalImagesSource(image)
@@ -57,14 +71,29 @@ export default {
         setSelectedOrderDetails(order)
         {
             this.selectedOrder = order;
-            console.log(this.selectedOrder);
+            console.log('selectedOrder', this.selectedOrder);
             this.calculateOrderTotal(this.selectedOrder);
+            this.calculatePartialReturnTotal();
         },
-        async fullReturn(sale_credit_notes, sale_order_id){
+        async showOrderDetails(id)
+        {
+            await this.http.get('sales-order/' + id).then((res) =>
+            {
+                this.selectedOrder = res.data;
+                console.log('data', res.data);
+                this.calculateOrderTotal(this.selectedOrder);
+            });
+            this.calculateOrderTotal(this.selectedOrder);
+            this.calculatePartialReturnTotal();
+
+        },
+        async fullReturn(sale_credit_notes, sale_order_id)
+        {
             this.sale_credit_notes.sale_order_id = sale_order_id;
             this.sale_credit_notes.amount_returned = this.orderTotal;
             this.sale_credit_notes.sale_credit_note_details = this.selectedOrder.sale_order_details;
-            this.sale_credit_notes.sale_credit_note_details.forEach(element => {
+            this.sale_credit_notes.sale_credit_note_details.forEach(element =>
+            {
                 element.sale_order_detail_id = element.id;
                 delete element.id;
             })
@@ -81,16 +110,31 @@ export default {
             }).catch((err) =>
             {
                 console.log(err);
-                this.$bvToast.toast('Error Creating Full Return', {
-                    title: 'Error',
-                    variant: 'danger',
-                    solid: true,
-                    autoHideDelay: 5000,
-                });
             });
         },
-        partialReturn(sale_credit_notes){
-            console.log(sale_credit_notes);
+        async partialReturn(sale_credit_notes, sale_order_id)
+        {
+            this.sale_credit_notes.sale_order_id = sale_order_id;
+            this.sale_credit_notes.amount_returned = this.orderTotal;
+            this.sale_credit_notes.sale_credit_note_details = this.selectedOrder.sale_order_details;
+            this.sale_credit_notes.sale_credit_note_details.forEach(element =>
+            {
+                element.sale_order_detail_id = element.id;
+                delete element.id;
+            });
+
+            await this.http.post('sales-credit-notes', this.sale_credit_notes).then((res) =>
+            {
+
+                if (res.status)
+                {
+                    this.$toast.success(`Order No #${this.selectedOrder.id} Full Returned`);
+                    this.paginateOrderDetails(this.page);
+                }
+            }).catch((err) =>
+            {
+                console.log(err);
+            });
         }
     },
     async mounted()
@@ -228,7 +272,9 @@ export default {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" @click="fullReturn(this.sale_credit_notes, selectedOrder.id)" data-bs-dismiss="modal">Return Order</button>
+                    <button type="button" class="btn btn-danger"
+                        @click="fullReturn(this.sale_credit_notes, selectedOrder.id)" data-bs-dismiss="modal">Return
+                        Order</button>
                 </div>
             </div>
         </div>
@@ -267,19 +313,20 @@ export default {
                                     <td><img :src="imgUrl + detail.product.img" alt="image" class="order-details-image">
                                     </td>
                                     <td>{{ detail.qty }}</td>
-                                    <td><input type="number" value="0" class="form-control" min="0"></td>
+                                    <td><input type="number" class="form-control" min="0" :max="detail.qty" @change="calculatePartialReturnTotal(detail)" v-model.number="selectedOrder.sale_order_details[index].newQty"></td>
                                     <td>{{ detail.price }}</td>
-                                    <td>{{ detail.price * detail.qty }}</td>
+                                    <td>{{ detail.price * detail.newQty }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <h4>Total: {{ orderTotal }}$</h4>
+                    <h4>Total: {{ partialReturnTotal }}$</h4>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" @click="partialReturn(this.sale_credit_notes)" data-bs-dismiss="modal">Return Order</button>
+                    <button type="button" class="btn btn-danger" @click="partialReturn(this.sale_credit_notes, selectedOrder.id)"
+                        data-bs-dismiss="modal">Return Order</button>
                 </div>
             </div>
         </div>

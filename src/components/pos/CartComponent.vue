@@ -97,11 +97,13 @@ export default {
         async pay() {
             this.cartProducts.forEach(product => {
                 product.product_id = product.id
+                delete product.id;
             });
             const obj = {
                 recipet_number: this.showRecipetNumberInput ? this.$refs.RecipetNumberInput.value : null,
                 file: this.showRecipetImageInput ? this.$refs.RecipetImageInput.files[0] : null,
                 order_details: JSON.stringify(this.cartProducts),
+                
             }
             if(this.cartProducts.length === 0 && this.cartTotal === 0) {
                 this.$toast.warning('No products in cart');

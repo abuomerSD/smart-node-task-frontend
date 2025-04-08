@@ -22,7 +22,7 @@ export default {
 <template>
     <div class="row">
         <!-- <h5>{{ category.name }} Products</h5> -->
-        <span v-for="product in products" :key="product.id" class="col-lg-4 col-md-2 col-sm-6">
+        <span v-for="product in products" :key="product.id" class="col-lg-3 col-md-2 col-sm-6 m-2">
             <b-card
                 :title="product.name"
                 :img-src="imgUrl + product.img"
