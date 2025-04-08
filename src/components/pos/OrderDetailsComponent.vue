@@ -60,10 +60,34 @@ export default {
             console.log(this.selectedOrder);
             this.calculateOrderTotal(this.selectedOrder);
         },
-        fullReturn(sale_credit_notes, sale_order_id){
+        async fullReturn(sale_credit_notes, sale_order_id){
             this.sale_credit_notes.sale_order_id = sale_order_id;
             this.sale_credit_notes.amount_returned = this.orderTotal;
-            console.log(sale_credit_notes);
+            this.sale_credit_notes.sale_credit_note_details = this.selectedOrder.sale_order_details;
+            this.sale_credit_notes.sale_credit_note_details.forEach(element => {
+                element.sale_order_detail_id = element.id;
+                delete element.id;
+            })
+            console.log('sale_credit_notes', sale_credit_notes);
+            console.log('Selected Order', this.selectedOrder)
+            await this.http.post('sales-credit-notes', this.sale_credit_notes).then((res) =>
+            {
+
+                if (res.status)
+                {
+                    this.$toast.success(`Order No #${this.selectedOrder.id} Full Returned`);
+                    this.paginateOrderDetails(this.page);
+                }
+            }).catch((err) =>
+            {
+                console.log(err);
+                this.$bvToast.toast('Error Creating Full Return', {
+                    title: 'Error',
+                    variant: 'danger',
+                    solid: true,
+                    autoHideDelay: 5000,
+                });
+            });
         },
         partialReturn(sale_credit_notes){
             console.log(sale_credit_notes);
@@ -204,7 +228,7 @@ export default {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" @click="fullReturn(this.sale_credit_notes, selectedOrder.id)">Return Order</button>
+                    <button type="button" class="btn btn-danger" @click="fullReturn(this.sale_credit_notes, selectedOrder.id)" data-bs-dismiss="modal">Return Order</button>
                 </div>
             </div>
         </div>
