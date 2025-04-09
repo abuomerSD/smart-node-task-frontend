@@ -51,7 +51,7 @@ export default {
                 console.log('total pages', this.total_rows);
 
                 // Calculate total pages
-                this.total_pages = Math.ceil(this.total_rows / this.limit);
+                // this.total_pages = Math.ceil(this.total_rows / this.limit);
                 this.total_pages = res.tot;
             });
         },
@@ -77,9 +77,11 @@ export default {
         },
         async showOrderDetails(id)
         {
-            await this.http.get('sales-order/' + id).then((res) =>
+            await this.http.get('sales-order/get-details/' + id).then((res) =>
             {
+                console.log('selected order', res.data);
                 this.selectedOrder = res.data;
+                this.selectedOrder.id = id;
                 console.log('data', res.data);
                 this.calculateOrderTotal(this.selectedOrder);
             });
@@ -112,23 +114,30 @@ export default {
                 console.log(err);
             });
         },
-        async partialReturn(sale_credit_notes, sale_order_id)
+        async partialReturn()
         {
-            this.sale_credit_notes.sale_order_id = sale_order_id;
+            console.log(this.sale_credit_notes)
+            this.sale_credit_notes.sale_order_id = this.selectedOrder.id;
             this.sale_credit_notes.amount_returned = this.orderTotal;
             this.sale_credit_notes.sale_credit_note_details = this.selectedOrder.sale_order_details;
             this.sale_credit_notes.sale_credit_note_details.forEach(element =>
             {
                 element.sale_order_detail_id = element.id;
                 delete element.id;
+                element.qty = element.newQty;
             });
 
-            await this.http.post('sales-credit-notes', this.sale_credit_notes).then((res) =>
+            if(this.sale_credit_notes.amount_returned <= 0) {
+                this.$toast.error('Please select a quantity to return');
+                return;
+            }
+
+            await this.http.post('sales-credit-notes', {...this.sale_credit_notes, sale_order_id: this.selectedOrder.id}).then((res) =>
             {
 
                 if (res.status)
                 {
-                    this.$toast.success(`Order No #${this.selectedOrder.id} Full Returned`);
+                    this.$toast.success(`Order No #${this.selectedOrder.id} Partial Returned`);
                     this.paginateOrderDetails(this.page);
                 }
             }).catch((err) =>
@@ -142,6 +151,7 @@ export default {
         await this.paginateOrderDetails(this.page);
         console.log('this.total_rows', this.total_rows)
         this.imgUrl = useAuthStore().mediaUrl;
+
     },
     watch: {
         page: function (page)
@@ -186,12 +196,12 @@ export default {
                             @click="setModalImagesSource(order.recipet_img)"></td>
                     <td v-if="order.recipet_number != 'null'">{{ order.recipet_number }}</td>
                     <td><a href="javascript:void(0)"><i class="bx bx-info-circle bx-sm" data-bs-toggle="modal"
-                                data-bs-target="#order-details-modal" @click="setSelectedOrderDetails(order)"></i></a>
+                                data-bs-target="#order-details-modal" @click="showOrderDetails(order.id)"></i></a>
                     </td>
                     <td><button class="btn btn-danger m-1" @click="setSelectedOrderDetails(order)"
-                            data-bs-toggle="modal" data-bs-target="#full-return-modal">Full Return</button><button
-                            class="btn btn-danger" @click="setSelectedOrderDetails(order)" data-bs-toggle="modal"
-                            data-bs-target="#partial-return-modal">Partial Return</button></td>
+                            data-bs-toggle="modal" data-bs-target="#full-return-modal" :disabled="order.sale_order_details.reduce((current, nextObj)=> { return current + nextObj.qty }, 0) === 0">Full Return</button><button
+                            class="btn btn-danger" @click="showOrderDetails(order.id)" data-bs-toggle="modal"
+                            data-bs-target="#partial-return-modal" :disabled="order.sale_order_details.reduce((current, nextObj)=> { return current + nextObj.qty }, 0) === 0">Partial Return</button></td>
                 </tr>
             </tbody>
         </table>
@@ -325,7 +335,7 @@ export default {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" @click="partialReturn(this.sale_credit_notes, selectedOrder.id)"
+                    <button type="button" class="btn btn-danger" @click="partialReturn"
                         data-bs-dismiss="modal">Return Order</button>
                 </div>
             </div>
