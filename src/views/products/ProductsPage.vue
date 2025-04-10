@@ -216,7 +216,7 @@ export default {
             <td><img :src="imgUrl + product.img" alt="product image" style="width: 150px; height: 100px;" /></td>
             <td>
               <div class="d-flex justify-content-center align-items-center">
-                <router-link to="single-product" ><i class="bx bx-info-circle bx-sm m-3" ></i></router-link>
+                <router-link :to="{name: 'product-logs', params: {id: product.id}}" ><i class="bx bx-info-circle bx-sm m-3" ></i></router-link>
                 <a href="javascript:void(0)" @click="preEditProduct(product)"><i class="bx bx-edit bx-sm m-3" ></i></a>
                 <a href="javascript:void(0)" @click="deleteProduct(product)"><i class="bx bxs-trash bx-sm m-3" style="color: red"></i></a>
               </div>

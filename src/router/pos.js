@@ -1,8 +1,8 @@
 export default [
     {
       path: "/dashboard/pos",
-      name: "Point Of Sale",
-      meta: { title: "PointOfSale", authRequired: true },
+      name: "point-of-sale",
+      meta: { title: "Point Of Sale", authRequired: true },
       component: () => import("../views/pos/PointOfSalePage.vue"),
     },
   ];

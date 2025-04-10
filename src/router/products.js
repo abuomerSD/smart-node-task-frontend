@@ -6,9 +6,9 @@ export default [
       component: () => import("../views/products/ProductsPage.vue"),
     },
     {
-      path: "/dashboard/categories/:category_id/products/:product_id",
-      name: "single-product",
-      meta: { title: "single-product", authRequired: true },
-      component: () => import("../views/products/SingleProductPage.vue"),
+      path: "/dashboard/products/:id/product-logs",
+      name: "product-logs",
+      meta: { title: "Product Logs", authRequired: true },
+      component: () => import("../views/products/ProductLogsPage.vue"),
     },
   ];
