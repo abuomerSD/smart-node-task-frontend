@@ -9,7 +9,7 @@ export default {
             imgUrl: '',
             page: 1,
             limit: 10,
-            total_rows: 1,
+            total_rows: 0,
             total_pages: 1,
             modalImage: '',
             selectedOrder: {},
@@ -189,8 +189,8 @@ export default {
             <tbody>
                 <tr v-for="(order, index) in OrderDetails" :key="index">
                     <td>{{ order.id }}</td>
-                    <td>{{ order.created }}</td>
-                    <td>{{ order.updated }}</td>
+                    <td>{{ new Date(order.created).toLocaleDateString() }}</td>
+                    <td>{{ new Date(order.updated).toLocaleDateString() }}</td>
                     <td v-if="order.recipet_img"><img :src="imgUrl + order.recipet_img" alt="image" class="order-image"
                             data-bs-toggle="modal" data-bs-target="#image-modal"
                             @click="setModalImagesSource(order.recipet_img)"></td>

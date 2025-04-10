@@ -57,6 +57,12 @@ export const menuItems = [
         link: "/dashboard/pos",
         parentId: 2,
       
+      },
+      {
+        id: 8,
+        label: "charts.title",
+        link: "/dashboard/charts",
+        parentId: 2,
       }
     ],
   },

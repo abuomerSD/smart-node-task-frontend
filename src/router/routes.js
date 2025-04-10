@@ -3,6 +3,8 @@ import test from "./test.js";
 import categories from "./categories.js";
 import products from './products.js';
 import pos from './pos.js';
+import charts from './charts.js';
+
 export default [
   {
     path: "/",
@@ -116,6 +118,7 @@ export default [
   ...categories,
   ...products,
   ...pos,
+  ...charts,
   {
     path: "/dashboard/crypto",
     name: "crypto-dashboard",
