@@ -15,7 +15,6 @@ export default {
             selectedOrder: {},
             orderTotal: 0,
             partialReturnTotal: 0,
-            tempQty: [0, 0, 0],
             sale_credit_notes: {
                 sale_order_id: null,
                 amount_returned: null,
@@ -116,7 +115,7 @@ export default {
         },
         async partialReturn()
         {
-            console.log(this.sale_credit_notes)
+            console.log('this.sale_credit_notes partial return', this.sale_credit_notes)
             this.sale_credit_notes.sale_order_id = this.selectedOrder.id;
             this.sale_credit_notes.amount_returned = this.orderTotal;
             this.sale_credit_notes.sale_credit_note_details = this.selectedOrder.sale_order_details;

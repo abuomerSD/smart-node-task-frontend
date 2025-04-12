@@ -29,6 +29,7 @@ export default {
         console.log('this.total_categories_pages', this.total_categories_pages);
         console.log('this.total_categories', this.total_categories);
         console.log('this.categoriesLimit', this.categoriesLimit);
+        this.showCategoryProducts(this.categories[0], this.productsPage);
     },
     methods: {
         refreshOrderDetails() {
@@ -170,7 +171,8 @@ export default {
         productsPage: function (productsPage) {
             this.showCategoryProducts(this.selectedCategory, productsPage);
         },
-    }
+    },
+    
 
 }
 </script>
@@ -182,7 +184,7 @@ export default {
         <div class="col-lg-7 col-md-12">
             <h4>Categories</h4>
             
-            <button v-for="category in categories" :key="category.id" class="btn-category" @click="showCategoryProducts(category, productsPage)">{{ category.name }}</button>
+            <button v-for="category in categories" :key="category.id" :ref="btn_category_ + category.id"  class="btn-category" @click="showCategoryProducts(category, productsPage)">{{ category.name }}</button>
             <b-pagination
                     v-if="total_categories_pages > 1"
                     v-model="categoriesPage"

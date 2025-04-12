@@ -10,44 +10,61 @@ export default {
 
     },
     methods: {
-        setChartPeridAsYear()
+        async setChartPeriodAsWeek()
         {
             this.selected = 'A';
+            const data = await this.http.get('sales-order/sales-of-last-week').then(response => {
+                return response.data.series;
+            });
+
             this.options = {
                 chart: {
-                    id: 'vuechart-example'
+                    id: 'week-sales-chart'
                 },
                 xaxis: {
-                    categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
+                    categories: data.map(item => {
+                        return item.x
+                    })
                 }
             },
             this.series = [{
-                name: 'series-1',
-                data: [30, 40, 45, 50, 49, 60, 70, 91]
+                name: 'Sales Of Last Week',
+                data: data.map(item => {    
+                    return item.y ? parseFloat(item.y) : 0;
+                })
             }]
+            
         },
-        setChartPeriodAsMonth()
+        async setChartPeriodAsMonth()
         {
             this.selected = 'B';
+
+            const data = await this.http.get('sales-order/sales-of-last-month').then(response => {
+                return response.data.series;
+            });
             this.options = {
                 chart: {
-                    id: 'vuechart-example'
+                    id: 'month-sales-chart'
                 },
                 xaxis: {
-                    categories: ['Jan', 'Feb', "Mar", "Apr", "May", "June", "July", "Aug"]
+                    categories: data.map(item => {
+                        return item.x
+                    })
                 }
             },
             this.series = [{
-                name: 'series-1',
-                data: [40, 60, 50, 30, 40, 50, 80, 90]
+                name: 'Sales Of Last Month',
+                data: data.map(item => {    
+                    return item.y ? parseFloat(item.y) : 0;
+                })
             }]
         },
     },
-    mounted()
+    async mounted()
     {
-        this.setChartPeridAsYear();
+        await this.setChartPeriodAsWeek();
     }
-}
+}   
 </script>
 
 <template>
@@ -55,8 +72,8 @@ export default {
         <h4>Sales Charts</h4>
         <hr>
         <b-form-group label="Type of Chart Period" v-slot="{ ariaDescribedby }">
-            <b-form-radio v-model="selected" @click="setChartPeridAsYear" :aria-describedby="ariaDescribedby"
-                name="some-radios" value="A" ref="radio_year">Year</b-form-radio>
+            <b-form-radio v-model="selected" @click="setChartPeriodAsWeek" :aria-describedby="ariaDescribedby"
+                name="some-radios" value="A" ref="radio_year">Week</b-form-radio>
             <b-form-radio v-model="selected" @click="setChartPeriodAsMonth" :aria-describedby="ariaDescribedby"
                 name="some-radios" value="B" ref="radio_month">Month</b-form-radio>
         </b-form-group>
