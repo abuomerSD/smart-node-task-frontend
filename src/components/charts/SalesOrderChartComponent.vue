@@ -3,7 +3,6 @@ export default {
     data()
     {
         return {
-            selected: null,
             options: {},
             series: [],
         }
@@ -12,7 +11,6 @@ export default {
     methods: {
         async setChartPeriodAsWeek()
         {
-            this.selected = 'A';
             const data = await this.http.get('sales-order/sales-of-last-week').then(response => {
                 return response.data.series;
             });
@@ -37,9 +35,7 @@ export default {
         },
         async setChartPeriodAsMonth()
         {
-            this.selected = 'B';
-
-            const data = await this.http.get('sales-order/sales-of-last-month').then(response => {
+            const data = await this.http.get('sales-order/sales-of-last-year').then(response => {
                 return response.data.series;
             });
             this.options = {
@@ -71,12 +67,14 @@ export default {
     <div>
         <h4>Sales Charts</h4>
         <hr>
-        <b-form-group label="Type of Chart Period" v-slot="{ ariaDescribedby }">
-            <b-form-radio v-model="selected" @click="setChartPeriodAsWeek" :aria-describedby="ariaDescribedby"
-                name="some-radios" value="A" ref="radio_year">Week</b-form-radio>
-            <b-form-radio v-model="selected" @click="setChartPeriodAsMonth" :aria-describedby="ariaDescribedby"
-                name="some-radios" value="B" ref="radio_month">Month</b-form-radio>
-        </b-form-group>
+        <div class="row">
+            <div class="col-1 m-2">
+                <button class="btn btn-success" @click="setChartPeriodAsWeek">Week</button>
+            </div>
+            <div class="col-1 m-2">
+                <button class="btn btn-success" @click="setChartPeriodAsMonth">Month</button>
+            </div>
+        </div>
         <apexchart width="500" type="line" :options="options" :series="series"></apexchart>
     </div>
 </template>
