@@ -176,7 +176,6 @@ export default {
                             <tr v-for="(product, index) in bestSellingProductOfDay" :key="index">
                                 <th scope="row">{{ index + 1 }}</th>
                                 <td>{{ product.product_name }}</td>
-                                {{ product.product_id }}
                                 <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
                                 <td>{{ product.total_sold }}</td>
                                 <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>

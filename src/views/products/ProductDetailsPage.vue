@@ -104,7 +104,7 @@ export default {
         <PageHeader title="Charts" pageTitle="Utility" />
         <h3>{{ product.name }} Sales Charts:</h3>
         <h5>Price: ${{ product.price }}</h5>
-        <img :src="imgUrl + product.img" alt="image" class="product-image">
+        <img :src="imgUrl + product.img" alt="image" class="product-details-image">
         <hr>
         <div class="row">
             <div class="col-lg-6 col-md-6 col-sm-12">
@@ -123,7 +123,7 @@ export default {
 </template>
 
 <style>
-.product-image {
+.product-details-image {
     width: 150px;
     height: 150px;
     border: 2px solid black;
