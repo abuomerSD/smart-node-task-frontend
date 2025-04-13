@@ -4,7 +4,8 @@ import ProductListComponent from './ProductListComponent.vue';
 
 export default {
     components: { ProductListComponent },
-    data() {
+    data()
+    {
         return {
             categories: [],
             products: [],
@@ -17,14 +18,15 @@ export default {
             total_categories: 0,
             total_categories_pages: 0,
             total_products: 0,
-            total_products_pages : 0,
+            total_products_pages: 0,
             cartTotal: 0,
             showRecipetNumberInput: false,
             showRecipetImageInput: false,
             selectedCategory: null,
         }
     },
-    async mounted() {
+    async mounted()
+    {
         await this.categoriesPaginate(this.categoriesPage);
         console.log('this.total_categories_pages', this.total_categories_pages);
         console.log('this.total_categories', this.total_categories);
@@ -32,58 +34,72 @@ export default {
         this.showCategoryProducts(this.categories[0], this.productsPage);
     },
     methods: {
-        refreshOrderDetails() {
+        refreshOrderDetails()
+        {
             this.$emit('refreshOrderDetails');
         },
-        toggleRecipetNumber(){
+        toggleRecipetNumber()
+        {
             this.showRecipetNumberInput = !this.showRecipetNumberInput;
             this.showRecipetImageInput = false;
         },
-        toggleRecipetImage() {
+        toggleRecipetImage()
+        {
             this.showRecipetImageInput = !this.showRecipetImageInput;
             this.showRecipetNumberInput = false;
         },
-        addToCart(product) {
+        addToCart(product)
+        {
             product.qty = 1;
             console.log(product);
-            console.log("price",typeof product.price);
-            console.log("qty",typeof product.qty);
+            console.log("price", typeof product.price);
+            console.log("qty", typeof product.qty);
             product.total = Number(product.price) * Number(product.qty);
             const isAdded = this.cartProducts.some(p => p.id === product.id);
-            if(!isAdded){
+            if (!isAdded)
+            {
                 this.cartProducts.push(product);
             }
             this.calculateTotals();
         },
-        removeFromCart(product){
+        removeFromCart(product)
+        {
             this.cartProducts = this.cartProducts.filter(p => p.id !== product.id);
             this.calculateTotals();
         },
-        async categoriesPaginate(page) {
+        async categoriesPaginate(page)
+        {
             console.log('page', page);
-            await this.http.get('categories/paginate', { page: this.categoriesPage , limit: this.categoriesLimit }).then((res) => {
+            await this.http.get('categories/paginate', { page: this.categoriesPage, limit: this.categoriesLimit }).then((res) =>
+            {
                 this.categories = res.data
                 this.total_categories = res.tot;
                 this.total_categories_pages = Math.ceil(this.total_categories / this.categoriesLimit);
             });
         },
-        async getCategoriesCount(){
-            await this.http.get('categories').then((res)=>{
-            this.total_categories = res.data.length;
+        async getCategoriesCount()
+        {
+            await this.http.get('categories').then((res) =>
+            {
+                this.total_categories = res.data.length;
             });
         },
-        showCategoryProducts(category, productsPage){
+        showCategoryProducts(category, productsPage)
+        {
             this.selectedCategory = category;
             this.total_products_pages = 0;
-            this.http.get(`products/paginate`,{category_id: category.id, page: productsPage, limit: this.productsLimit}).then((res) => {
+            this.http.get(`products/paginate`, { category_id: category.id, page: productsPage, limit: this.productsLimit }).then((res) =>
+            {
                 this.products = res.data;
                 this.total_products = res.tot;
                 this.total_products_pages = Math.ceil(this.total_products / this.productsLimit);
             });
         },
-        calculateTotals() {
+        calculateTotals()
+        {
             let newArray = [];
-            this.cartProducts.forEach(product => {
+            this.cartProducts.forEach(product =>
+            {
                 product.total = Number(product.price) * Number(product.qty);
                 newArray.push(product);
             });
@@ -91,120 +107,131 @@ export default {
 
             // cart total
             this.cartTotal = 0;
-            this.cartProducts.forEach(product => {
+            this.cartProducts.forEach(product =>
+            {
                 this.cartTotal += product.total;
             });
         },
-        async pay() {
-            this.cartProducts.forEach(product => {
-                product.product_id = product.id
-                delete product.id;
-            });
-            const obj = {
-                recipet_number: this.showRecipetNumberInput ? this.$refs.RecipetNumberInput.value : null,
-                file: this.showRecipetImageInput ? this.$refs.RecipetImageInput.files[0] : null,
-                order_details: JSON.stringify(this.cartProducts),
-                
-            }
-            if(this.cartProducts.length === 0 && this.cartTotal === 0) {
+        async pay()
+        {
+            if (this.cartProducts.length === 0 && this.cartTotal === 0)
+            {
                 this.$toast.warning('No products in cart');
                 return;
             }
 
-            if(this.showRecipetNumberInput) {
-                if(!obj.recipet_number) {
+            const orderDetails = this.cartProducts.map(product => ({
+                ...product,
+                product_id: product.id,
+                id: undefined // or simply omit it completely
+            }));
+
+            const obj = {
+                recipet_number: this.showRecipetNumberInput ? this.$refs.RecipetNumberInput.value : null,
+                file: this.showRecipetImageInput ? this.$refs.RecipetImageInput.files[0] : null,
+                order_details: JSON.stringify(orderDetails),
+            };
+
+            if (this.showRecipetNumberInput)
+            {
+                if (!obj.recipet_number)
+                {
                     this.$toast.warning("Recipet number is required");
                     return;
                 }
-                await this.http.post('sales-order',obj).then((res) => {
-                    if(res.status) {
+                await this.http.post('sales-order', obj).then((res) =>
+                {
+                    if (res.status)
+                    {
                         this.clearCart();
                         this.$toast.success("Payment successful");
                         console.log(res);
                         this.$refs.RecipetNumberInput.value = '';
                         this.refreshOrderDetails();
-                    } else {
+                    } else
+                    {
                         this.$toast.error("Payment failed");
                     }
-                    });
+                });
             }
 
-            if(this.showRecipetImageInput){
-                if(this.$refs.RecipetImageInput.files.length == 0) { 
+            if (this.showRecipetImageInput)
+            {
+                if (this.$refs.RecipetImageInput.files.length === 0)
+                {
                     this.$toast.warning("Recipet Image is required");
                     return;
                 }
-                await this.http.do('sales-order',obj).then((res) => {
-                    if(res.status) {
+                await this.http.do('sales-order', obj).then((res) =>
+                {
+                    if (res.status)
+                    {
                         this.clearCart();
                         this.$toast.success("Payment successful");
-                        console.log(res);   
+                        console.log(res);
                         this.$refs.RecipetImageInput.value = null;
                         this.refreshOrderDetails();
-                    } else {
+                    } else
+                    {
                         this.$toast.error("Payment failed");
                     }
-                    });
-                
+                });
             }
-            
-        },
-        clearCart(){
+        }
+        ,
+        clearCart()
+        {
             this.cartProducts = [];
             this.cartTotal = 0;
         },
-        incrementProductQty(product) {
+        incrementProductQty(product)
+        {
             product.qty++;
             this.calculateTotals();
         },
-        decrementProductQty(product) {
-            if (product.qty > 1) {
+        decrementProductQty(product)
+        {
+            if (product.qty > 1)
+            {
                 product.qty--;
                 this.calculateTotals();
             }
         },
     },
     watch: {
-        categoriesPage: function (val) {
+        categoriesPage: function (val)
+        {
             this.categoriesPaginate(val);
         },
-        productsPage: function (productsPage) {
+        productsPage: function (productsPage)
+        {
             this.showCategoryProducts(this.selectedCategory, productsPage);
         },
     },
-    
+
 
 }
 </script>
 
 <template>
-    
+
     <div class="row">
         <!-- Categories Start -->
         <div class="col-lg-7 col-md-12">
             <h4>Categories</h4>
-            
-            <button v-for="category in categories" :key="category.id" :ref="btn_category_ + category.id"  class="btn-category" @click="showCategoryProducts(category, productsPage)">{{ category.name }}</button>
-            <b-pagination
-                    v-if="total_categories_pages > 1"
-                    v-model="categoriesPage"
-                    :total-rows="total_categories"
-                    :per-page="categoriesLimit" 
-                    aria-controls="my-table"
-            ></b-pagination>
-            <ProductListComponent @add-to-cart="addToCart" :products="products" :category="selectedCategory"/>
-                    
+
+            <button v-for="category in categories" :key="category.id" :ref="btn_category_ + category.id"
+                class="btn-category" @click="showCategoryProducts(category, productsPage)">{{ category.name }}</button>
+            <b-pagination v-if="total_categories_pages > 1" v-model="categoriesPage" :total-rows="total_categories"
+                :per-page="categoriesLimit" aria-controls="my-table"></b-pagination>
+            <ProductListComponent @add-to-cart="addToCart" :products="products" :category="selectedCategory" />
+
             <div class="row">
                 <div class="col">
                 </div>
             </div>
-            <b-pagination
-            v-if="total_products_pages > 1"
-            v-model="productsPage"
-            :total-rows="total_products"
-            :per-page="productsLimit"
-            aria-controls="my-table"
-            ></b-pagination>
+            <b-pagination v-if="total_products_pages > 1" v-model="productsPage" :total-rows="total_products"
+                :per-page="productsLimit" aria-controls="my-table"></b-pagination>
         </div>
         <!-- Categories End -->
         <!-- Invoice Start -->
@@ -223,16 +250,20 @@ export default {
                 </thead>
                 <tbody>
                     <tr v-for="(product, index) in cartProducts" :key="product.id">
-                        <th scope="row">{{ index+1 }}</th>
+                        <th scope="row">{{ index + 1 }}</th>
                         <td>{{ product.name }}</td>
                         <td>
-                            <a href="javascript:void(0)" @click="incrementProductQty(product)"><i class="bx bxs-plus-circle bx-sm"></i></a> 
-                            <input type="number" class="qty-input" @input="calculateTotals" v-model="product.qty" min="1"> 
-                            <a href="javascript:void(0)" @click="decrementProductQty(product)"><i class="bx bxs-minus-circle bx-sm" style="color: red"></i></a>
+                            <a href="javascript:void(0)" @click="incrementProductQty(product)"><i
+                                    class="bx bxs-plus-circle bx-sm"></i></a>
+                            <input type="number" class="qty-input" @input="calculateTotals" v-model="product.qty"
+                                min="1">
+                            <a href="javascript:void(0)" @click="decrementProductQty(product)"><i
+                                    class="bx bxs-minus-circle bx-sm" style="color: red"></i></a>
                         </td>
                         <td>{{ product.price }}</td>
                         <td>{{ product.total }}</td>
-                        <td><a href="javascript:void(0)" @click="removeFromCart(product)"><i class='bx bxs-trash bx-sm' style="color: red;"></i></a></td>
+                        <td><a href="javascript:void(0)" @click="removeFromCart(product)"><i class='bx bxs-trash bx-sm'
+                                    style="color: red;"></i></a></td>
                     </tr>
                 </tbody>
             </table>
@@ -240,40 +271,44 @@ export default {
                 <h5>Total: {{ cartTotal }}$</h5>
                 <button class="btn btn-danger" @click="clearCart">Clear Cart</button>
                 <!-- <button class="btn btn-primary m-3" @click="pay">Pay</button> -->
-                
-                <b-button v-b-modal.Pay-Modal class="btn btn-primary m-3" style="background-color: #02520a; color: white">Pay</b-button>
-                
+
+                <b-button v-b-modal.Pay-Modal class="btn btn-primary m-3"
+                    style="background-color: #02520a; color: white">Pay</b-button>
+
                 <b-modal id="Pay-Modal" title="Confirm Payment" ok-title="Pay" cancel-title="Cancel" @ok="pay">
                     <div>
                         <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
-                            <b-form-radio @click="toggleRecipetNumber" :aria-describedby="ariaDescribedby" name="some-radios" value="A">Pay Using Recipet Number</b-form-radio>
-                            <b-form-radio @click="toggleRecipetImage" :aria-describedby="ariaDescribedby" name="some-radios" value="B">Pay Using Recipet Image</b-form-radio>
+                            <b-form-radio @click="toggleRecipetNumber" :aria-describedby="ariaDescribedby"
+                                name="some-radios" value="A">Pay Using Recipet Number</b-form-radio>
+                            <b-form-radio @click="toggleRecipetImage" :aria-describedby="ariaDescribedby"
+                                name="some-radios" value="B">Pay Using Recipet Image</b-form-radio>
                         </b-form-group>
-                        </div>
-                        <div v-show="showRecipetNumberInput" class="m-2">
-                            <input type="text" placeholder="Recipet Number" class="form-control" ref="RecipetNumberInput">
-                        </div>
-                        <div v-show="showRecipetImageInput" class="m-2">
-                            <input type="File" plceholder="Recipet Image" class="form-control" ref="RecipetImageInput">
-                        </div>
-                    </b-modal>
-                    
-                </div>
+                    </div>
+                    <div v-show="showRecipetNumberInput" class="m-2">
+                        <input type="text" placeholder="Recipet Number" class="form-control" ref="RecipetNumberInput">
+                    </div>
+                    <div v-show="showRecipetImageInput" class="m-2">
+                        <input type="File" plceholder="Recipet Image" class="form-control" ref="RecipetImageInput">
+                    </div>
+                </b-modal>
+
             </div>
-            <!-- Invoice End -->
+        </div>
+        <!-- Invoice End -->
     </div>
-    
+
 </template>
 
 <style>
-    .qty-input {
-        max-width: 70px;
-    }
-    .btn-category {
-        margin: 3px;
-        background-color: #035e4c;
-        border: 1px solid black;
-        border-radius: 5px;
-        color: white;
-    }
+.qty-input {
+    max-width: 70px;
+}
+
+.btn-category {
+    margin: 3px;
+    background-color: #035e4c;
+    border: 1px solid black;
+    border-radius: 5px;
+    color: white;
+}
 </style>
