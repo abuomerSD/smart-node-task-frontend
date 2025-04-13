@@ -11,4 +11,10 @@ export default [
       meta: { title: "Product Logs", authRequired: true },
       component: () => import("../views/products/ProductLogsPage.vue"),
     },
+    {
+      path: "/dashboard/charts/products/product-details/:id",
+      name: "product-details",
+      meta: { title: "Product Details", authRequired: true },
+      component: () => import("../views/products/ProductDetailsPage.vue"),
+    },
   ];

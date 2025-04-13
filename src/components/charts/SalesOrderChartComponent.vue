@@ -78,7 +78,8 @@ export default {
                     })
                 }]
         },
-        async setBestSellingProductsOfDay() {
+        async setBestSellingProductsOfDay()
+        {
             await this.http.get('sales-order/best-sellings-day').then(response =>
             {
                 this.bestSellingProductOfDay = response.data;
@@ -88,7 +89,8 @@ export default {
                 this.$toast.error("Error fetching best selling products of day");
             });
         },
-        async setBestSellingProductsOfWeek() {
+        async setBestSellingProductsOfWeek()
+        {
             await this.http.get('sales-order/best-sellings-week').then(response =>
             {
                 this.bestSellingProductOfWeek = response.data;
@@ -98,7 +100,8 @@ export default {
                 this.$toast.error("Error fetching best selling products of week");
             });
         },
-        async setBestSellingProductsOfMonth() {
+        async setBestSellingProductsOfMonth()
+        {
             await this.http.get('sales-order/best-sellings-month').then(response =>
             {
                 this.bestSellingProductOfMonth = response.data;
@@ -108,7 +111,8 @@ export default {
                 this.$toast.error("Error fetching best selling products of month");
             });
         },
-        async setBestSellingProductsOfYear() {
+        async setBestSellingProductsOfYear()
+        {
             await this.http.get('sales-order/best-sellings-year').then(response =>
             {
                 this.bestSellingProductOfYear = response.data;
@@ -128,6 +132,7 @@ export default {
         await this.setBestSellingProductsOfMonth();
         await this.setBestSellingProductsOfYear();
         this.imgUrl = useAuthStore().mediaUrl;
+        console.log(this.bestSellingProductOfYear)
     }
 }   
 </script>
@@ -158,46 +163,51 @@ export default {
                 <h5>Best Selling Products (Daily)</h5>
                 <div class="table-responsive">
                     <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Product Name</th>
-                            <th scope="col">Product Image</th>
-                            <th scope="col">Total Sold</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(product, index) in bestSellingProductOfDay" :key="index">
-                            <th scope="row">{{ index + 1 }}</th>
-                            <td>{{ product.product_name }}</td>
-                            <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
-                            <td>{{ product.total_sold }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Product Image</th>
+                                <th scope="col">Total Sold</th>
+                                <th scope="col">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(product, index) in bestSellingProductOfDay" :key="index">
+                                <th scope="row">{{ index + 1 }}</th>
+                                <td>{{ product.product_name }}</td>
+                                {{ product.product_id }}
+                                <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
+                                <td>{{ product.total_sold }}</td>
+                                <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12">
                 <h5>Best Selling Products (Weekly)</h5>
                 <div class="table-responsive">
                     <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Product Name</th>
-                            <th scope="col">Product Image</th>
-                            <th scope="col">Total Sold</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(product, index) in bestSellingProductOfWeek" :key="index">
-                            <th scope="row">{{ index + 1 }}</th>
-                            <td>{{ product.product_name }}</td>
-                            <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
-                            <td>{{ product.total_sold }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Product Image</th>
+                                <th scope="col">Total Sold</th>
+                                <th scope="col">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(product, index) in bestSellingProductOfWeek" :key="index">
+                                <th scope="row">{{ index + 1 }}</th>
+                                <td>{{ product.product_name }}</td>
+                                <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
+                                <td>{{ product.total_sold }}</td>
+                                <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -206,46 +216,50 @@ export default {
                 <h5>Best Selling Products (Monthly)</h5>
                 <div class="table-responsive">
                     <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Product Name</th>
-                            <th scope="col">Product Image</th>
-                            <th scope="col">Total Sold</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(product, index) in bestSellingProductOfMonth" :key="index">
-                            <th scope="row">{{ index + 1 }}</th>
-                            <td>{{ product.product_name }}</td>
-                            <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
-                            <td>{{ product.total_sold }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Product Image</th>
+                                <th scope="col">Total Sold</th>
+                                <th scope="col">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(product, index) in bestSellingProductOfMonth" :key="index">
+                                <th scope="row">{{ index + 1 }}</th>
+                                <td>{{ product.product_name }}</td>
+                                <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
+                                <td>{{ product.total_sold }}</td>
+                                <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12">
                 <h5>Best Selling Products (Yearly)</h5>
                 <div class="table-responsive">
                     <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Product Name</th>
-                            <th scope="col">Product Image</th>
-                            <th scope="col">Total Sold</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(product, index) in bestSellingProductOfYear" :key="index">
-                            <th scope="row">{{ index + 1 }}</th>
-                            <td>{{ product.product_name }}</td>
-                            <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
-                            <td>{{ product.total_sold }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Product Image</th>
+                                <th scope="col">Total Sold</th>
+                                <th scope="col">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(product, index) in bestSellingProductOfYear" :key="index">
+                                <th scope="row">{{ index + 1 }}</th>
+                                <td>{{ product.product_name }}</td>
+                                <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
+                                <td>{{ product.total_sold }}</td>
+                                <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -253,10 +267,10 @@ export default {
 </template>
 
 <style>
-    .product-image{
-        width: 80px;
-        height: 80px;
-        border: 1px solid black ;
-        border-radius: 3px;
-    }
+.product-image {
+    width: 80px;
+    height: 80px;
+    border: 1px solid black;
+    border-radius: 3px;
+}
 </style>
