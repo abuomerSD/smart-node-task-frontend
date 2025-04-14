@@ -232,14 +232,17 @@ export default {
             <td>{{ index + 1 }}</td>
             <td>{{ product.name }}</td>
             <td>{{ product.price }}</td>
-            <td><img :src="imgUrl + product.img" alt="product image" style="width: 150px; height: 100px;" /></td>
+            <td><img :src="imgUrl + product.img" alt="product image" style="width: 150px; height: 100px;" class="product-image"/></td>
             <td>
               <div class="d-flex justify-content-center align-items-center">
                 <a href="javascript:void(0)" @click="preEditProduct(product)"><i class="bx bx-edit bx-sm m-3"></i></a>
                 <a href="javascript:void(0)" @click="deleteProduct(product)"><i class="bx bxs-trash bx-sm m-3"
                     style="color: red"></i></a>
+                <router-link :to="{ name: 'product-details', params: { id: product.id } }"><i
+                    class="bx bx-info-circle bx-sm m-2"></i></router-link>
                 <router-link :to="{ name: 'product-logs', params: { id: product.id } }"><button
                     class="btn btn-primary">Logs</button></router-link>
+
               </div>
             </td>
           </tr>

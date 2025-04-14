@@ -169,7 +169,6 @@ export default {
                                 <th scope="col">Product Name</th>
                                 <th scope="col">Product Image</th>
                                 <th scope="col">Total Sold</th>
-                                <th scope="col">Details</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -178,7 +177,6 @@ export default {
                                 <td>{{ product.product_name }}</td>
                                 <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
                                 <td>{{ product.total_sold }}</td>
-                                <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>
                             </tr>
                         </tbody>
                     </table>
@@ -194,7 +192,6 @@ export default {
                                 <th scope="col">Product Name</th>
                                 <th scope="col">Product Image</th>
                                 <th scope="col">Total Sold</th>
-                                <th scope="col">Details</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -203,7 +200,6 @@ export default {
                                 <td>{{ product.product_name }}</td>
                                 <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
                                 <td>{{ product.total_sold }}</td>
-                                <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>
                             </tr>
                         </tbody>
                     </table>
@@ -221,7 +217,6 @@ export default {
                                 <th scope="col">Product Name</th>
                                 <th scope="col">Product Image</th>
                                 <th scope="col">Total Sold</th>
-                                <th scope="col">Details</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -230,7 +225,6 @@ export default {
                                 <td>{{ product.product_name }}</td>
                                 <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
                                 <td>{{ product.total_sold }}</td>
-                                <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>
                             </tr>
                         </tbody>
                     </table>
@@ -246,7 +240,6 @@ export default {
                                 <th scope="col">Product Name</th>
                                 <th scope="col">Product Image</th>
                                 <th scope="col">Total Sold</th>
-                                <th scope="col">Details</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -255,7 +248,6 @@ export default {
                                 <td>{{ product.product_name }}</td>
                                 <td><img :src="imgUrl + product.img" alt="image" class="product-image"></td>
                                 <td>{{ product.total_sold }}</td>
-                                <td><router-link :to="{name: 'product-details', params: {id: product.product_id}}"><i class="bx bx-info-circle bx-sm"></i></router-link></td>
                             </tr>
                         </tbody>
                     </table>
