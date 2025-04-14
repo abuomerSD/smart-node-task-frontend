@@ -17,47 +17,7 @@ export default {
         name: '',
         data: []
       },],
-      chartOptions: {
-        chart: {
-          type: 'bar',
-          height: 350
-        },
-        plotOptions: {
-          bar: {
-            horizontal: false,
-            columnWidth: '55%',
-            borderRadius: 5,
-            borderRadiusApplication: 'end'
-          },
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          show: true,
-          width: 2,
-          colors: ['transparent']
-        },
-        xaxis: {
-          categories: ['']
-        },
-        yaxis: {
-          title: {
-            text: '$ Dollars'
-          }
-        },
-        fill: {
-          opacity: 1
-        },
-        tooltip: {
-          y: {
-            formatter: function (val)
-            {
-              return "$ " + val + " Dollars"
-            }
-          }
-        }
-      },
+      chartOptions: {},
 
       productList: [],
       fromDate: null,
@@ -68,61 +28,101 @@ export default {
   methods: {
     async showChart()
     {
-      this.productList.forEach(async product =>
+      if (!this.fromDate)
       {
-        if (!this.fromDate)
-        {
-          this.$toast.warning('select from date');
-          return;
-        }
-        if (!this.toDate)
-        {
-          this.$toast.warning('select to date');
-          return;
-        }
-        if (this.productList.length < 1)
-        {
-          this.$toast.warning('select some products');
-          return;
-        }
-        let response = [];
-        await this.http.post('sales-order/product-sales-compare/', { product_id: product.id, from: this.fromDate, to: this.toDate }).then(res =>
-        {
-          response = res.data;
-        }).catch(error =>
-        {
-          console.error('Error fetching sales data:', error);
-          this.$toast.error("Error fetching sales data");
-          return;
-        });
-
-        // add product to series
-      this.chartOptions = {
-        xaxis: {
-          categories: response.series.map(item =>
-          {
-            return item.x
-          })
-        }
+        this.$toast.warning('select from date');
+        return;
+      }
+      if (!this.toDate)
+      {
+        this.$toast.warning('select to date');
+        return;
+      }
+      if (this.productList.length < 1)
+      {
+        this.$toast.warning('select some products');
+        return;
       }
 
-      // this.chartOptions.xaxis.categories.push(response.series)
-      this.series.push({ name: product.name, data: response.series.map(item => item.y ? item.y : 0) });
+      let productIds = [];
+
+      this.productList.forEach(p => productIds.push(p.id));
+
+      let response = [];
+      await this.http.post('sales-order/product-sales-compare/', { productIds, from: this.fromDate, to: this.toDate }).then(res =>
+      {
+        response = res.data;
+      }).catch(error =>
+      {
+        console.error('Error fetching sales data:', error);
+        this.$toast.error("Error fetching sales data");
+        return;
+      });
+
+      response.forEach(p =>
+      {
+        console.log(p);
+        // this.chartOptions = {
+        //   xaxis: {
+        //     categories: p.data.map(item =>
+        //     {
+        //       return item.label
+        //     })
+        //   }
+        // }
+
+        this.chartOptions = {
+            chart: {
+              height: 350,
+              type: 'line',
+              zoom: {
+                enabled: false
+              }
+            },
+            dataLabels: {
+              enabled: false
+            },
+            stroke: {
+              curve: 'straight'
+            },
+            title: {
+              text: 'Product Trends by Month',
+              align: 'left'
+            },
+            grid: {
+              row: {
+                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+                opacity: 0.5
+              },
+            },
+            xaxis: {
+            categories: p.data.map(item =>
+            {
+              return item.label
+            })
+          }
+          }
+        this.series.push({ name: p.name, data: p.data.map(item => item.y ? item.y : 0) });
       console.log('chartOptions', this.chartOptions);
       this.productList = [];
+      this.fromDate = '';
+      this.toDate = '';
+
+        
       });
     },
 
     addToProductList(selectedProduct)
     {
-      if(this.series.length > 0) {
+      if (this.series.length > 0)
+      {
         // clear previous settings from chart
         this.chartOptions = {
-          xaxis:{
-            categories:[],
+          xaxis: {
+            categories: [],
           }
         }
-        this.series= [];
+        this.series = [];
       }
       if (!selectedProduct)
       {
@@ -196,14 +196,12 @@ export default {
           </b-list-group>
         </div>
         <div class="row" v-if="productList.length > 0">
-          <div class="col-4"></div>
-          <div class="col-4"><button class="btn btn-success" @click="showChart()">Add To Chart</button></div>
-          <div class="col-4"></div>
+          <div class="col-4"><button class="btn btn-success mb-2" @click="showChart()">Generate Chart</button></div>
         </div>
       </div>
       <div class="col-lg-8">
         <div id="chart">
-          <apexchart type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+          <apexchart type="line" height="350" :options="chartOptions" :series="series"></apexchart>
         </div>
       </div>
     </div>
