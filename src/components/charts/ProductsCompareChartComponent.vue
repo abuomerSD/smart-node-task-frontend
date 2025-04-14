@@ -116,6 +116,12 @@ export default {
     addToProductList(selectedProduct)
     {
       if(this.series.length > 0) {
+        // clear previous settings from chart
+        this.chartOptions = {
+          xaxis:{
+            categories:[],
+          }
+        }
         this.series= [];
       }
       if (!selectedProduct)
