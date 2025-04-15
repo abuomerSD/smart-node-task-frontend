@@ -1,9 +1,11 @@
 <script>
 import Layout from "../../layouts/main";
 import PageHeader from "@/components/page-header";
+import AutoComplete from 'primevue/autocomplete';
+
 
 export default {
-    components: { Layout, PageHeader },
+    components: { Layout, PageHeader, AutoComplete },
     data()
     {
         return {
@@ -14,6 +16,8 @@ export default {
             files: [],
             documents: [],
             document: { name: null, file: null },
+            filteredAccounts: [],
+            accountsNames: ["eltayeb", "omer", "ahmed"],
         }
     },
     methods: {
@@ -109,11 +113,15 @@ export default {
         save() 
         {
             // check transaction records 
-            if(this.records.length < 1) {
-                this.$toast.warning('Insert Some Transcations First (Debit or Credit)')
+            if (this.records.length < 1)
+            {
+                this.$toast.warning('Insert Some Transcations First (Debits and Credits)')
                 return
             }
-            
+        },
+        searchAccounts(event) 
+        {
+            this.filteredAccounts = this.accountsNames.filter(acc => acc.toLowerCase().includes(event.query.toLowerCase()))
         }
     }
 };
@@ -125,7 +133,9 @@ export default {
             <b-list-group-item>
                 <div class="row">
                     <div class="col-lg-4">
-                        <input type="text" class="form-control" placeholder="Account" v-model="record.account">
+                        <!-- <input type="text" class="form-control" placeholder="Account" v-model="record.account"> -->
+                        <AutoComplete v-model="record.account" :suggestions="filteredAccounts" dropdown
+                            @complete="searchAccounts($event)" placeholder="Search for a Account" />
                     </div>
                     <div class="col-lg-3 mt-2"> <input type="radio" :name="record.account" v-model="record.operation"
                             value="debit" class="ml-2"> <strong>Debit</strong> <input type="radio" name="operation"

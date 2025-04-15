@@ -27,6 +27,9 @@ import $e from "@/services/$e";
 import ToastPlugin from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-bootstrap.css';
 
+// PrimeVue
+import PrimeVue from 'primevue/config';
+
 
 
 const firebaseConfig = {
@@ -61,5 +64,6 @@ createApp(App)
   .use(popup)
   .use(http)
   .use($e)
+  .use(PrimeVue)
   .use(ToastPlugin, { position: 'top', duration: 3000 })
   .mount("#app");
