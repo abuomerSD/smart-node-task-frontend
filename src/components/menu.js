@@ -63,7 +63,13 @@ export const menuItems = [
         label: "charts.title",
         link: "/dashboard/charts",
         parentId: 2,
-      }
+      },
+      {
+        id: 9,
+        label: "journalEntries.title",
+        link: "/dashboard/journal-entries",
+        parentId: 2,
+      },
     ],
   },
   {

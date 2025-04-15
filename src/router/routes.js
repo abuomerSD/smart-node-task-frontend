@@ -4,6 +4,7 @@ import categories from "./categories.js";
 import products from './products.js';
 import pos from './pos.js';
 import charts from './charts.js';
+import journalEntries from "./journalEntries.js";
 
 export default [
   {
@@ -119,6 +120,7 @@ export default [
   ...products,
   ...pos,
   ...charts,
+  ...journalEntries,
   {
     path: "/dashboard/crypto",
     name: "crypto-dashboard",
