@@ -4,76 +4,73 @@ import PageHeader from "@/components/page-header";
 import AutoComplete from 'primevue/autocomplete';
 
 
+
 export default {
     components: { Layout, PageHeader, AutoComplete },
     data()
     {
         return {
-            records: [{ operation: 'debit' }, { operation: 'debit' }],
-            // record: { account: null, operation: null, value: null },
+            records: [{ type: 'debit' }, { type: 'debit' }],
             totalDebit: 0,
             totalCredit: 0,
             files: [],
             documents: [{ name: "", file: { name: '' } }],
-            // document: { name: null, file: null },
             filteredAccounts: [],
             accountsNames: [],
             accounts: [],
-            isRemoveBtnDisabled: false,
+            description_en: '',
+            description_ar: '',
         }
     },
     methods: {
         addRecordRow()
         {
-            this.records.push({ operation: 'debit' });
+            this.records.push({ type: 'debit' });
         },
         addDocumentRow()
         {
             this.documents.push({})
         },
-        addRecord(record)
-        {
-            // input checks
-            if (!record.account)
-            {
-                this.$toast.warning('Add Account First');
-                return;
-            }
-            if (!record.operation)
-            {
-                this.$toast.warning('Select Operation Type First');
-                return;
-            }
-            if (!record.value)
-            {
-                this.$toast.warning('Enter Operation Value First');
-                return;
-            }
+        // addRecord(record)
+        // {
+        //     // input checks
+        //     if (!record.account)
+        //     {
+        //         this.$toast.warning('Add Account First');
+        //         return;
+        //     }
+        //     if (!record.type)
+        //     {
+        //         this.$toast.warning('Select Operation Type First');
+        //         return;
+        //     }
+        //     if (!record.value)
+        //     {
+        //         this.$toast.warning('Enter Operation Value First');
+        //         return;
+        //     }
 
-            // check if account already added to records
-            const accountExists = this.records.some(rec => rec.account === record.account)
-            if (accountExists)
-            {
-                this.$toast.warning('This Account Already Added, Choose another one')
-                return
-            }
-            this.records.push(record)
-            // clearing the default inputs
-            this.record = { account: null, operation: null, value: null }
-            // calculating totals
-            this.calculateTotals();
-        },
+        //     // check if account already added to records
+        //     const accountExists = this.records.some(rec => rec.account === record.account)
+        //     if (accountExists)
+        //     {
+        //         this.$toast.warning('This Account Already Added, Choose another one')
+        //         return
+        //     }
+        //     this.records.push(record)
+        //     // clearing the default inputs
+        //     this.record = { account: null, type: null, value: null }
+        //     // calculating totals
+        //     this.calculateTotals();
+        // },
         canRemoveRecord()
         {
-            // Enable only when:
-            // 1- records.length > 2
             return this.records.length > 2;
         },
         removeRecord(record)
         {
             this.records = this.records.filter(r => r !== record);
             this.calculateTotals();
-            console.log('records after delete one', this.records)
         },
         calculateTotals()
         {
@@ -85,60 +82,147 @@ export default {
                 {
                     rec.value = 0
                 }
-                if (rec.operation === 'debit')
+                if (rec.type === 'debit')
                 {
                     this.totalDebit += rec.value
                 }
-                if (rec.operation === 'credit')
+                if (rec.type === 'credit')
                 {
                     this.totalCredit += rec.value
                 }
             })
         },
-        addDocument(document)
-        {
-            document.file = this.$refs.file.files[0]
-            console.log(document)
-            // checks
-            if (!document.name)
-            {
-                this.$toast.warning('Enter Document Name')
-                return
-            }
-            if (!document.file)
-            {
-                this.$toast.warning('Choose File')
-                return
-            }
+        // addDocument(document)
+        // {
+        //     document.file = this.$refs.file.files[0]
+        //     console.log(document)
+        //     // checks
+        //     if (!document.name)
+        //     {
+        //         this.$toast.warning('Enter Document Name')
+        //         return
+        //     }
+        //     if (!document.file)
+        //     {
+        //         this.$toast.warning('Choose File')
+        //         return
+        //     }
 
-            // check if document already added
-            const documentExists = this.documents.some(doc => doc.name == document.name)
-            if (documentExists)
-            {
-                this.$toast.warning('Document Already Added')
-                return
-            }
+        //     // check if document already added
+        //     const documentExists = this.documents.some(doc => doc.name == document.name)
+        //     if (documentExists)
+        //     {
+        //         this.$toast.warning('Document Already Added')
+        //         return
+        //     }
 
-            this.documents.push(document)
-            this.document = { name: null, file: null }
-        },
+        //     this.documents.push(document)
+        //     this.document = { name: null, file: null }
+        // },
         canRemoveDocument()
         {
             return this.documents.length > 1
         },
         removeDocument(document)
         {
-            console.log(document)
             this.documents = this.documents.filter(doc => doc !== document)
         },
-        save() 
+        async save() 
         {
+            // validations
             // check transaction records 
             if (this.records.length < 1)
             {
                 this.$toast.warning('Insert Some Transcations First (Debits and Credits)')
                 return
             }
+
+            // check for nullable records
+            this.records.forEach(rec =>
+            {
+                if (!rec.value || rec.value === 0)
+                {
+                    this.$toast.warning('fill all records values')
+                    return
+                }
+                if (!rec.account_name)
+                {
+                    this.$toast.warning('fill all records accounts')
+                    return
+                }
+            })
+
+            // check for nullable documents 
+
+            this.documents.forEach(doc =>
+            {
+                if (!doc.name)
+                {
+                    this.$toast.warning('fill all document names')
+                    return
+                }
+                if (!doc.file)
+                {
+                    this.$toast.warning('select file for each document')
+                    return
+                }
+            })
+
+            // check if debits != credits 
+            if (this.totalDebit !== this.totalCredit)
+            {
+                this.$toast.warning('Total Debit Not Equal to Total Credit')
+                return
+            }
+
+            // check if debits or credits == 0
+            if (this.totalDebit === 0 || this.totalCredit === 0)
+            {
+                this.$toast.warning('Total Debit or Total Credit connot be zero')
+                return
+            }
+
+            // const formData = new FormData();
+            // this.documents.forEach((doc, index) =>
+            // {
+            //     formData.append(`documents[${index}][name]`, doc.name);
+            //     formData.append(`documents[${index}][file]`, doc.file);
+            // });
+
+            // adding id's to accounts
+
+            this.records.forEach(rec =>
+            {
+                const account = this.accounts.find(acc => acc.name_en === rec.account_name);
+                rec.account_id = account.id;
+
+                // also adding descriptions
+                rec.descr = this.description_ar
+                rec.descr_en = this.description_en
+            })
+
+            this.documents.forEach(doc =>
+            {
+                this.files.push(doc.file)
+            })
+
+            let data = {
+                records: JSON.stringify(this.records),
+                documents: JSON.stringify(this.documents),
+                descr_en: this.description_en,
+                descr: this.description_ar,
+            }
+
+            this.files.forEach((file) =>
+            {
+                data = { ...data, file: file }
+            })
+            console.log('data', data)
+
+            await this.http.do('transactions', data).then(res =>
+            {
+                console.log('response ', res.data)
+            })
         },
         searchAccounts(event) 
         {
@@ -149,14 +233,24 @@ export default {
             await this.http.get('transactions/get-all-level3-accounts').then(res =>
             {
                 this.accounts = res.data
-                console.log('accounts', this.accounts)
                 this.accounts.forEach(acc => this.accountsNames.push(acc.name_en))
             })
+        },
+        handleFileChange(index)
+        {
+            // You can add file validation here if needed
+            console.log('File selected:', this.documents[index].file);
         }
     },
     mounted()
     {
         this.getAllLvlThreeAccounts()
+    },
+    computed: {
+        canUpload()
+        {
+            return this.documents.every(doc => doc.name && doc.file);
+        }
     }
 };
 </script>
@@ -172,14 +266,13 @@ export default {
             <b-list-group-item v-for="(r, index) in records" :key="index">
                 <div class="row">
                     <div class="col-lg-4">
-                        <AutoComplete v-model="r.account" :suggestions="filteredAccounts" dropdown
+                        <AutoComplete v-model="r.account_name" :suggestions="filteredAccounts" dropdown
                             @complete="searchAccounts($event)" placeholder="Search for a Account" />
                     </div>
                     <div class="col-lg-3 mt-2"> <input :id="`debit-${index}`" type="radio" @change="calculateTotals"
-                            v-model="r.operation" :name="index" value="debit" class="ml-2"> <label
-                            :for="`debit-${index}`" style="margin: 5px;">Debit</label><input :id="`credit-${index}`"
-                            type="radio" @change="calculateTotals" v-model="r.operation" :name="index" value="credit"
-                            class="ml-2">
+                            v-model="r.type" :name="index" value="debit" class="ml-2"> <label :for="`debit-${index}`"
+                            style="margin: 5px;">Debit</label><input :id="`credit-${index}`" type="radio"
+                            @change="calculateTotals" v-model="r.type" :name="index" value="credit" class="ml-2">
                         <label :for="`credit-${index}`" style="margin: 5px;">Credit</label>
                     </div>
                     <div class="col-lg-3">
@@ -208,13 +301,13 @@ export default {
         <hr>
         <div class="row">
             <div class="col-lg-2 col-md-12 col-sm-12 mt-2"><strong>Description</strong></div>
-            <div class="col-lg-5 col-md-12 col-sm-12 ml-2"><input type="text" class="form-control"
-                    placeholder="Description"></div>
+            <div class="col-lg-5 col-md-12 col-sm-12 ml-2"><input v-model="description_en" type="text"
+                    class="form-control" placeholder="Description"></div>
         </div>
         <div class="row mt-2">
             <div class="col-lg-2 col-md-12 col-sm-12 mt-2"><strong>Description in Arabic</strong></div>
-            <div class="col-lg-5 col-md-12 col-sm-12 ml-2"><input type="text" class="form-control"
-                    placeholder="Description in Arabic"></div>
+            <div class="col-lg-5 col-md-12 col-sm-12 ml-2"><input v-model="description_ar" type="text"
+                    class="form-control" placeholder="Description in Arabic"></div>
         </div>
         <hr>
         <div class="row">
@@ -230,15 +323,15 @@ export default {
                     <b-list-group-item v-for="(document, index) in documents" :key="index">
                         <div class="row">
                             <div class="col-lg-5">
-                                <!-- <strong class="m-2">{{ document.name }}</strong> -->
                                 <div class=""><input type="text" class="form-control mt-2" placeholder="Document Name"
                                         v-model="document.name">
                                 </div>
                             </div>
                             <div class="col-lg-6">
-                                <!-- <strong class="m-2">{{ document.file.name }}</strong> -->
                                 <div class="">
-                                    <input type="file" class="form-control mt-2" placeholder="Choose a File" ref="file">
+                                    <b-form-file v-model="document.file" :state="Boolean(document.file)"
+                                        placeholder="Choose a file..." drop-placeholder="Drop file here..."
+                                        @change="handleFileChange(index)" class="mt-2"></b-form-file>
                                 </div>
                             </div>
                             <div class="col-lg-1"><a href="javascript:void(0)"
