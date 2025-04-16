@@ -7,7 +7,7 @@ import vClickOutside from "click-outside-vue3";
 import { registerScrollSpy } from "vue3-scroll-spy";
 
 import { vMaska } from "maska";
-import {i18n} from "./i18n";
+import { i18n } from "./i18n";
 import { initFirebaseBackend } from "./authUtils";
 import { configureFakeBackend } from "./helpers/fake-backend";
 
@@ -29,6 +29,7 @@ import 'vue-toast-notification/dist/theme-bootstrap.css';
 
 // PrimeVue
 import PrimeVue from 'primevue/config';
+import Aura from '@primeuix/themes/aura';
 
 
 
@@ -43,9 +44,11 @@ const firebaseConfig = {
   measurementId: process.env.VUE_APP_MEASUREMENTID,
 };
 
-if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
+if (process.env.VUE_APP_DEFAULT_AUTH === "firebase")
+{
   initFirebaseBackend(firebaseConfig);
-} else {
+} else
+{
   configureFakeBackend();
 }
 
@@ -64,6 +67,10 @@ createApp(App)
   .use(popup)
   .use(http)
   .use($e)
-  .use(PrimeVue)
+  .use(PrimeVue, {
+    theme: {
+      preset: Aura
+    }
+  })
   .use(ToastPlugin, { position: 'top', duration: 3000 })
   .mount("#app");
