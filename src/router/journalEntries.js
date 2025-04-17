@@ -11,4 +11,10 @@ export default [
       meta: { title: "Add Manual Journal", authRequired: true },
       component: () => import("../views/journal-entries/AddManualJournalPage.vue"),
     },
+    {
+      path: "/dashboard/journal-entries/:id",
+      name: "journal-details",
+      meta: { title: "Journal Details", authRequired: true },
+      component: () => import("../views/journal-entries/JournalDetailsPage.vue"),
+    },
   ];

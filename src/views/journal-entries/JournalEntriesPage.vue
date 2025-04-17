@@ -86,9 +86,14 @@ export default {
                 </thead>
                 <tbody>
                     <tr v-for="(transaction, index) in transactions" :key="index">
+
                         <th scope="row">{{ index + 1 }}</th>
                         <td>{{ new Date(transaction.created).toLocaleDateString() }}</td>
-                        <td>{{ transaction.id }}</td>
+                        <td>
+                            <router-link :to="{ name: 'journal-details', params: { id: transaction.id } }">
+                                {{ transaction.id }}
+                            </router-link>
+                        </td>
                         <td>{{ transaction.descr_en }}</td>
                         <td>{{ transaction.amount }}</td>
                     </tr>
