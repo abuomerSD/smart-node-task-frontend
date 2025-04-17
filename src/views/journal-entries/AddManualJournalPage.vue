@@ -31,38 +31,6 @@ export default {
         {
             this.documents.push({})
         },
-        // addRecord(record)
-        // {
-        //     // input checks
-        //     if (!record.account)
-        //     {
-        //         this.$toast.warning('Add Account First');
-        //         return;
-        //     }
-        //     if (!record.type)
-        //     {
-        //         this.$toast.warning('Select Operation Type First');
-        //         return;
-        //     }
-        //     if (!record.value)
-        //     {
-        //         this.$toast.warning('Enter Operation Value First');
-        //         return;
-        //     }
-
-        //     // check if account already added to records
-        //     const accountExists = this.records.some(rec => rec.account === record.account)
-        //     if (accountExists)
-        //     {
-        //         this.$toast.warning('This Account Already Added, Choose another one')
-        //         return
-        //     }
-        //     this.records.push(record)
-        //     // clearing the default inputs
-        //     this.record = { account: null, type: null, value: null }
-        //     // calculating totals
-        //     this.calculateTotals();
-        // },
         canRemoveRecord()
         {
             return this.records.length > 2;
@@ -92,33 +60,6 @@ export default {
                 }
             })
         },
-        // addDocument(document)
-        // {
-        //     document.file = this.$refs.file.files[0]
-        //     console.log(document)
-        //     // checks
-        //     if (!document.name)
-        //     {
-        //         this.$toast.warning('Enter Document Name')
-        //         return
-        //     }
-        //     if (!document.file)
-        //     {
-        //         this.$toast.warning('Choose File')
-        //         return
-        //     }
-
-        //     // check if document already added
-        //     const documentExists = this.documents.some(doc => doc.name == document.name)
-        //     if (documentExists)
-        //     {
-        //         this.$toast.warning('Document Already Added')
-        //         return
-        //     }
-
-        //     this.documents.push(document)
-        //     this.document = { name: null, file: null }
-        // },
         canRemoveDocument()
         {
             return this.documents.length > 1
@@ -182,13 +123,6 @@ export default {
                 return
             }
 
-            // const formData = new FormData();
-            // this.documents.forEach((doc, index) =>
-            // {
-            //     formData.append(`documents[${index}][name]`, doc.name);
-            //     formData.append(`documents[${index}][file]`, doc.file);
-            // });
-
             // adding id's to accounts
 
             this.records.forEach(rec =>
@@ -203,7 +137,11 @@ export default {
 
             this.documents.forEach(doc =>
             {
+                // add file to files array
                 this.files.push(doc.file)
+
+                // remove file from documents array
+                delete doc.file;
             })
 
             let data = {
@@ -213,15 +151,25 @@ export default {
                 descr: this.description_ar,
             }
 
-            this.files.forEach((file) =>
+
+            for (let i = 0; i < this.files.length; i++)
             {
-                data = { ...data, file: file }
-            })
+                data[`file${i}`] = this.files[i]
+            }
             console.log('data', data)
 
             await this.http.do('transactions', data).then(res =>
             {
                 console.log('response ', res.data)
+                this.$toast.success(`Transaction No #${res.data.id} Saved Successfully`)
+                // clear old data
+                this.records = [{ type: 'debit' }, { type: 'debit' }]
+                this.documents = [{ name: "", file: { name: '' } }]
+                this.files = []
+                this.description_en = ''
+                this.description_ar = ''
+                this.totalDebit = 0
+                this.totalCredit = 0
             })
         },
         searchAccounts(event) 
