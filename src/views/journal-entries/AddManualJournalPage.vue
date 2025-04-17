@@ -17,7 +17,6 @@ export default {
             documents: [{ name: "", file: { name: '' } }],
             filteredAccounts: [],
             accountsNames: [],
-            accounts: [],
             description_en: '',
             description_ar: '',
         }
@@ -86,7 +85,7 @@ export default {
                     this.$toast.warning('fill all records values')
                     return
                 }
-                if (!rec.account_name)
+                if (!rec.account)
                 {
                     this.$toast.warning('fill all records accounts')
                     return
@@ -95,19 +94,19 @@ export default {
 
             // check for nullable documents 
 
-            this.documents.forEach(doc =>
-            {
-                if (!doc.name)
-                {
-                    this.$toast.warning('fill all document names')
-                    return
-                }
-                if (!doc.file)
-                {
-                    this.$toast.warning('select file for each document')
-                    return
-                }
-            })
+            // this.documents.forEach(doc =>
+            // {
+            //     if (!doc.name)
+            //     {
+            //         this.$toast.warning('fill all document names')
+            //         return
+            //     }
+            //     if (!doc.file)
+            //     {
+            //         this.$toast.warning('select file for each document')
+            //         return
+            //     }
+            // })
 
             // check if debits != credits 
             if (this.totalDebit !== this.totalCredit)
@@ -127,8 +126,8 @@ export default {
 
             this.records.forEach(rec =>
             {
-                const account = this.accounts.find(acc => acc.name_en === rec.account_name);
-                rec.account_id = account.id;
+
+                rec.account_id = rec.account.id;
 
                 // also adding descriptions
                 rec.descr = this.description_ar
@@ -172,27 +171,26 @@ export default {
                 this.totalCredit = 0
             })
         },
-        searchAccounts(event) 
+        async searchAccounts(event) 
         {
-            this.filteredAccounts = this.accountsNames.filter(acc => acc.toLowerCase().includes(event.query.toLowerCase()))
-        },
-        async getAllLvlThreeAccounts()
-        {
-            await this.http.get('transactions/get-all-level3-accounts').then(res =>
+            // this.filteredAccounts = this.accountsNames.filter(acc => acc.toLowerCase().includes(event.query.toLowerCase()))
+            await this.http.get('transactions/get-level3-account/', { search: event.query.toLowerCase() }).then(res =>
             {
-                this.accounts = res.data
-                this.accounts.forEach(acc => this.accountsNames.push(acc.name_en))
+                this.filteredAccounts = res.data
+                console.log('search', event.query.toLowerCase())
+
+                // this.accounts.forEach(acc => this.accountsNames.push(acc.name_en))
             })
         },
         handleFileChange(index)
         {
             // You can add file validation here if needed
             console.log('File selected:', this.documents[index].file);
-        }
+        },
     },
     mounted()
     {
-        this.getAllLvlThreeAccounts()
+
     },
     computed: {
         canUpload()
@@ -214,8 +212,9 @@ export default {
             <b-list-group-item v-for="(r, index) in records" :key="index">
                 <div class="row">
                     <div class="col-lg-4">
-                        <AutoComplete v-model="r.account_name" :suggestions="filteredAccounts" dropdown
-                            @complete="searchAccounts($event)" placeholder="Search for a Account" />
+                        <AutoComplete v-model="r.account" :suggestions="filteredAccounts" dropdown
+                            @complete="searchAccounts($event)" placeholder="Search for a Account"
+                            optionLabel="name_en" />
                     </div>
                     <div class="col-lg-3 mt-2"> <input :id="`debit-${index}`" type="radio" @change="calculateTotals"
                             v-model="r.type" :name="index" value="debit" class="ml-2"> <label :for="`debit-${index}`"
