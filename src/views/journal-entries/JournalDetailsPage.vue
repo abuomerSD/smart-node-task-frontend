@@ -12,6 +12,8 @@ export default {
         return {
             transaction_id: 0,
             transactionDetails: null,
+            totalDebit: 0,
+            totalCredit: 0,
         }
     },
     methods: {
@@ -22,12 +24,27 @@ export default {
                 this.transactionDetails = res.data
                 console.log('data', res.data)
             })
+        },
+        calculateTotals()
+        {
+            this.transactionDetails.forEach(detail =>
+            {
+                if (detail.type === 'debit')
+                {
+                    this.totalDebit += Number(detail.value)
+                }
+                if (detail.type === 'credit')
+                {
+                    this.totalCredit += Number(detail.value)
+                }
+            })
         }
     },
-    mounted()
+    async mounted()
     {
         this.transaction_id = this.$route.params.id;
-        this.getTransactionDetailsById();
+        await this.getTransactionDetailsById();
+        this.calculateTotals();
     }
 };
 </script>
@@ -41,21 +58,37 @@ export default {
                     <thead>
                         <tr>
                             <th scope="col">#</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Account No</th>
                             <th scope="col">Account Name</th>
-                            <th scope="col">Transaction Type</th>
                             <th scope="col">Description</th>
-                            <th scope="col">Value</th>
+                            <th scope="col">Debit</th>
+                            <th scope="col">Credit</th>
+
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(transaction, index) in transactionDetails" :key="index">
                             <th scope="row">{{ index + 1 }}</th>
+                            <td>{{ new Date(transaction.created).toLocaleDateString() }}</td>
+                            <td>{{ transaction.account_id }}</td>
                             <td>{{ transaction.account_name }}</td>
-                            <td>{{ transaction.type }}</td>
                             <td>{{ transaction.descr }}</td>
-                            <td>{{ transaction.value }}</td>
+                            <td>{{ transaction.type === 'debit' ? transaction.value : 0 }}</td>
+                            <td>{{ transaction.type === 'credit' ? transaction.value : 0 }}</td>
                         </tr>
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><strong>{{ totalDebit }}</strong></td>
+                            <td><strong>{{ totalCredit }}</strong></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
