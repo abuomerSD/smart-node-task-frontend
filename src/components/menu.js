@@ -82,6 +82,12 @@ export const menuItems = [
     isTitle: true,
   },
   {
+    id: 100,
+    label: "menuitems.customers.name",
+    icon: "bx-calendar",
+    link: "/customers",
+  },
+  {
     id: 9,
     label: "menuitems.calendar.text",
     icon: "bx-calendar",
@@ -912,25 +918,7 @@ export const menuItems = [
           },
         ],
       },
-      {
-        id: 127,
-        label: "menuitems.multilevel.list.level1.2",
-        parentId: 124,
-        subItems: [
-          {
-            id: 128,
-            label: "menuitems.multilevel.list.level1.level2.1",
-            link: "#",
-            parentId: 124,
-          },
-          {
-            id: 129,
-            label: "menuitems.customers.name",
-            link: "#",
-            parentId: 124,
-          },
-        ],
-      },
+
     ],
   },
 ];

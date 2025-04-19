@@ -104,7 +104,7 @@ export default {
         <div class="row">
             <div class="col-lg-6">
                 <div class="table-responsive">
-                    <div class="table">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
@@ -122,7 +122,7 @@ export default {
                                         :download="document.file">Download</a></td>
                             </tr>
                         </tbody>
-                    </div>
+                    </table>
                 </div>
             </div>
         </div>
