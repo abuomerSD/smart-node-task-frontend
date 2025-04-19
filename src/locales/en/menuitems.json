@@ -266,6 +266,9 @@
             }
           }
         }
+      }, 
+      "customers" : {
+        "name": "customers"
       }
     
 }

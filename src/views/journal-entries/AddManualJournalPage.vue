@@ -92,22 +92,6 @@ export default {
                 }
             })
 
-            // check for nullable documents 
-
-            // this.documents.forEach(doc =>
-            // {
-            //     if (!doc.name)
-            //     {
-            //         this.$toast.warning('fill all document names')
-            //         return
-            //     }
-            //     if (!doc.file)
-            //     {
-            //         this.$toast.warning('select file for each document')
-            //         return
-            //     }
-            // })
-
             // check if debits != credits 
             if (this.totalDebit !== this.totalCredit)
             {
@@ -187,6 +171,10 @@ export default {
             // You can add file validation here if needed
             console.log('File selected:', this.documents[index].file);
         },
+        accountName(one)
+        {
+            return one.name_en + ' - ' + one.code
+        }
     },
     mounted()
     {
@@ -214,7 +202,7 @@ export default {
                     <div class="col-lg-4">
                         <AutoComplete v-model="r.account" :suggestions="filteredAccounts" dropdown
                             @complete="searchAccounts($event)" placeholder="Search for a Account"
-                            optionLabel="name_en" />
+                            :optionLabel="accountName" />
                     </div>
                     <div class="col-lg-3 mt-2"> <input :id="`debit-${index}`" type="radio" @change="calculateTotals"
                             v-model="r.type" :name="index" value="debit" class="ml-2"> <label :for="`debit-${index}`"

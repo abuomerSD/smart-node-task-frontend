@@ -1,6 +1,7 @@
 <script>
 import Layout from "../../layouts/main";
 import PageHeader from "@/components/page-header";
+import { useAuthStore } from '@/state/pinia.js';
 
 /**
  * Starter component
@@ -14,6 +15,8 @@ export default {
             transactionDetails: null,
             totalDebit: 0,
             totalCredit: 0,
+            documents: [],
+            staticsUrl: '',
         }
     },
     methods: {
@@ -21,8 +24,10 @@ export default {
         {
             await this.http.get(`transactions/details/${this.transaction_id}`).then(res =>
             {
-                this.transactionDetails = res.data
-                console.log('data', res.data)
+                this.transactionDetails = res.data.details
+                this.documents = res.data.documents
+                console.log('docs', this.documents)
+                console.log('res data', res.data)
             })
         },
         calculateTotals()
@@ -45,6 +50,7 @@ export default {
         this.transaction_id = this.$route.params.id;
         await this.getTransactionDetailsById();
         this.calculateTotals();
+        this.staticsUrl = useAuthStore().mediaUrl;
     }
 };
 </script>
@@ -73,7 +79,7 @@ export default {
                             <td>{{ new Date(transaction.created).toLocaleDateString() }}</td>
                             <td>{{ transaction.account_id }}</td>
                             <td>{{ transaction.account_name }}</td>
-                            <td>{{ transaction.descr }}</td>
+                            <td>{{ transaction.descr_en }}</td>
                             <td>{{ transaction.type === 'debit' ? transaction.value : 0 }}</td>
                             <td>{{ transaction.type === 'credit' ? transaction.value : 0 }}</td>
                         </tr>
@@ -90,6 +96,34 @@ export default {
                         </tr>
                     </tfoot>
                 </table>
+            </div>
+        </div>
+        <div class="row">
+            <strong>Documents:</strong>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="table-responsive">
+                    <div class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <!-- <th scope="col">File</th> -->
+                                <th scope="col">Download</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(document, index) in documents" :key="index">
+                                <th scope="row">{{ index + 1 }}</th>
+                                <td>{{ document.name }}</td>
+                                <!-- <td>{{ document.file }}</td> -->
+                                <td><a class="btn btn-success" :href="`${staticsUrl}${document.file}`"
+                                        :download="document.file">Download</a></td>
+                            </tr>
+                        </tbody>
+                    </div>
+                </div>
             </div>
         </div>
     </Layout>
