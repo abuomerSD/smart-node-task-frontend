@@ -6,6 +6,7 @@ import pos from './pos.js';
 import charts from './charts.js';
 import journalEntries from "./journalEntries.js";
 import customers from "./customers.js";
+import cashAccounts from "./cashAccounts.js";
 
 export default [
   {
@@ -123,6 +124,7 @@ export default [
   ...charts,
   ...journalEntries,
   ...customers,
+  ...cashAccounts,
   {
     path: "/dashboard/crypto",
     name: "crypto-dashboard",

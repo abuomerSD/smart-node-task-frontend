@@ -269,6 +269,9 @@
       }, 
       "customers" : {
         "name": "customers"
+      },
+      "cashaccounts": {
+        "name": "Cash Accounts"
       }
     
 }

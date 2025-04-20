@@ -88,6 +88,12 @@ export const menuItems = [
     link: "/customers",
   },
   {
+    id: 100,
+    label: "menuitems.cashaccounts.name",
+    icon: "bx-calendar",
+    link: "/cash-accounts",
+  },
+  {
     id: 9,
     label: "menuitems.calendar.text",
     icon: "bx-calendar",
