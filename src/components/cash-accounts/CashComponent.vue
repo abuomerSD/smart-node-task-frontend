@@ -6,10 +6,10 @@ export default {
     {
         return {
             account: { type: 'cash' },
-            limit: 5,
-            page: 1,
+            cashLimit: 5,
+            cashPage: 1,
             accounts: [],
-            total_accounts: 0,
+            total_cash_accounts: 0,
         }
     },
     methods: {
@@ -21,11 +21,12 @@ export default {
                 this.$toast.warning('Please Enter Account Name in Arabic and English')
                 return
             }
-            await this.http.post('cash-accounts', this.account).then(res =>
+            await this.http.post('cash-accounts', this.account).then(async res =>
             {
                 console.log('res', res.data)
                 this.$toast.success('Account Saved Successfully')
                 this.account = { type: 'cash' }
+                await this.paginate()
             })
         },
         async update()
@@ -35,6 +36,17 @@ export default {
                 console.log('res', res.data)
                 await this.paginate()
                 this.$toast.success('Account Updated Successfully')
+                this.account = { type: 'cash' }
+            })
+        },
+        async deleteAccount()
+        {
+            await this.http.delete('cash-accounts', this.account.level_three_chart_of_account_id).then(async res =>
+            {
+                console.log('res', res.data)
+                await this.paginate()
+                this.$toast.success('Account Deleted Successfully')
+                this.account = { type: 'cash' }
             })
         },
         select(account)
@@ -43,11 +55,11 @@ export default {
         },
         async paginate()
         {
-            await this.http.get('cash-accounts/paginate/', { page: this.page, limit: this.limit }).then(res =>
+            await this.http.get('cash-accounts/cash/paginate/', { page: this.cashPage, limit: this.cashLimit }).then(res =>
             {
-                console.log('res', res.data)
-                this.accounts = res.data.filter(account => account.type === 'cash')
-                this.total_accounts = res.tot
+                console.log('res', res)
+                this.accounts = res.data
+                this.total_cash_accounts = res.tot
             })
         }
     },
@@ -56,7 +68,7 @@ export default {
         await this.paginate();
     },
     watch: {
-        page: async function ()
+        cashPage: async function ()
         {
             await this.paginate();
         }
@@ -88,12 +100,14 @@ export default {
                     <td>{{ account.balance }}</td>
                     <td><button class="btn btn-success m-1">Transfer</button><button class="btn btn-primary m-1"
                             data-bs-toggle="modal" data-bs-target="#edit-cash-account-modal"
-                            @click="select(account)">Edit</button><button class="btn btn-danger m-1">Delete</button>
+                            @click="select(account)">Edit</button><button class="btn btn-danger m-1"
+                            data-bs-toggle="modal" data-bs-target="#delete-cash-account-confirmation-modal"
+                            @click="select(account)">Delete</button>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <b-pagination v-model="page" :total-rows="total_accounts" :per-page="limit"
+        <b-pagination v-model="cashPage" :total-rows="total_cash_accounts" :per-page="cashLimit"
             aria-controls="my-table"></b-pagination>
     </div>
     <!-- Modals -->
@@ -123,7 +137,8 @@ export default {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="save">Save</button>
+                        <button type="button" class="btn btn-primary" @click="save"
+                            data-bs-dismiss="modal">Save</button>
                     </div>
                 </div>
             </div>
@@ -154,11 +169,34 @@ export default {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="update">Update</button>
+                        <button type="button" class="btn btn-primary" @click="update"
+                            data-bs-dismiss="modal">Update</button>
                     </div>
                 </div>
             </div>
         </div>
         <!-- edit cash account modal end -->
+        <!-- delete cash account confirmation modal start -->
+        <!-- Modal -->
+        <div class="modal fade" id="delete-cash-account-confirmation-modal" tabindex="-1"
+            aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Do You want to delete this account: <strong>{{ account.name_en }}</strong> ?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" @click="deleteAccount"
+                            data-bs-dismiss="modal">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- delete cash account confirmation modal end -->
     </div>
 </template>
