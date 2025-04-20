@@ -9,6 +9,7 @@ export default {
             limit: 5,
             page: 1,
             accounts: [],
+            total_accounts: 0,
         }
     },
     methods: {
@@ -27,13 +28,37 @@ export default {
                 this.account = { type: 'cash' }
             })
         },
-        async paginate()
+        async update()
         {
-            await this.http.get('cash-accounts/paginate', { page: this.page, limit: this.limit }).then(res =>
+            await this.http.put(`cash-accounts`, this.account.level_three_chart_of_account_id, this.account).then(async res =>
             {
                 console.log('res', res.data)
-                this.accounts = res.data
+                await this.paginate()
+                this.$toast.success('Account Updated Successfully')
             })
+        },
+        select(account)
+        {
+            this.account = account
+        },
+        async paginate()
+        {
+            await this.http.get('cash-accounts/paginate/', { page: this.page, limit: this.limit }).then(res =>
+            {
+                console.log('res', res.data)
+                this.accounts = res.data.filter(account => account.type === 'cash')
+                this.total_accounts = res.tot
+            })
+        }
+    },
+    async mounted()
+    {
+        await this.paginate();
+    },
+    watch: {
+        page: async function ()
+        {
+            await this.paginate();
         }
     }
 }
@@ -56,11 +81,20 @@ export default {
                 </tr>
             </thead>
             <tbody>
-                <tr>
-
+                <tr v-for="(account, index) in accounts" :key="index">
+                    <th scope="row">{{ index + 1 }}</th>
+                    <td>{{ account.level_three_chart_of_account_id }}</td>
+                    <td>{{ account.name_en }}</td>
+                    <td>{{ account.balance }}</td>
+                    <td><button class="btn btn-success m-1">Transfer</button><button class="btn btn-primary m-1"
+                            data-bs-toggle="modal" data-bs-target="#edit-cash-account-modal"
+                            @click="select(account)">Edit</button><button class="btn btn-danger m-1">Delete</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
+        <b-pagination v-model="page" :total-rows="total_accounts" :per-page="limit"
+            aria-controls="my-table"></b-pagination>
     </div>
     <!-- Modals -->
     <div class="modals">
@@ -95,5 +129,36 @@ export default {
             </div>
         </div>
         <!-- add account modal end -->
+        <!-- edit cash account modal start -->
+        <div class="modal fade" id="edit-cash-account-modal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Cash Account</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row m-2">
+                            <input type="text" class="form-control" placeholder="type" disabled value="cash"
+                                v-model="account.type">
+                        </div>
+                        <div class="row m-2">
+                            <input type="text" class="form-control" placeholder="Account Name in Arabic"
+                                v-model="account.name">
+                        </div>
+                        <div class="row m-2">
+                            <input type="text" class="form-control" placeholder="Account Name in English"
+                                v-model="account.name_en">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" @click="update">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- edit cash account modal end -->
     </div>
 </template>
