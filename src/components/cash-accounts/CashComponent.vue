@@ -1,7 +1,9 @@
 <script>
+import AutoComplete from 'primevue/autocomplete';
+
 
 export default {
-    components: {},
+    components: { AutoComplete },
     data()
     {
         return {
@@ -10,6 +12,8 @@ export default {
             cashPage: 1,
             accounts: [],
             total_cash_accounts: 0,
+            filteredAccounts: [],
+            receiverAccount: { name_en: '', },
         }
     },
     methods: {
@@ -52,6 +56,85 @@ export default {
         select(account)
         {
             this.account = account
+        },
+        async searchAccount(event) 
+        {
+            console.log('event', event)
+            await this.http.post('cash-accounts/search', { search: event.query.toLowerCase() }).then(res =>
+            {
+                console.log('res', res)
+                this.filteredAccounts = res.data
+                console.log('filteredAccounts', this.filteredAccounts)
+            })
+        },
+        setReceiverAccount()
+        {
+            console.log('receiverAccount', this.receiverAccount)
+        },
+        getAccountObjects(value)
+        {
+            if (value.name)
+            {
+                return `${value.name_en} -  ${value.name}`
+            } else
+            {
+                return ''
+            }
+        },
+        async transfer()
+        {
+            console.log('account', this.account)
+            console.log('receiver account', this.receiverAccount)
+            if (!this.receiverAccount.id)
+            {
+                this.$toast.warning(`Please select an Account First`)
+                return
+            }
+            if (this.receiverAccount.id === this.account.id)
+            {
+                this.$toast.warning(`You can't Transfer Funds From Account To the same Account`)
+                return
+            }
+            if (!this.receiverAccount.descr && !this.receiverAccount.descr_en)
+            {
+                this.$toast.warning('Please Enter Trasnfer Description')
+                return
+            }
+            if (!this.receiverAccount.value)
+            {
+                this.$toast.warning('Please Enter The Transfer Value')
+                return
+            }
+            if (this.receiverAccount.value > this.account.balance)
+            {
+                this.$toast.warning('Transfer Value is more than this account balance')
+                return
+            }
+
+            let obj = {
+                descr: this.receiverAccount.descr,
+                descr_en: this.receiverAccount.descr_en,
+                documents: JSON.stringify([]),
+            }
+
+            let records = [];
+            records.push({
+                account_id: this.account.level_three_chart_of_account_id, type: 'credit', value: this.receiverAccount.value, descr: this.receiverAccount.descr,
+                descr_en: this.receiverAccount.descr_en,
+            })
+
+            records.push({
+                account_id: this.receiverAccount.level_three_chart_of_account_id, type: 'debit', value: this.receiverAccount.value, descr: this.receiverAccount.descr,
+                descr_en: this.receiverAccount.descr_en,
+            })
+
+            await this.http.post('transactions', { ...obj, records: JSON.stringify(records) }).then(async res =>
+            {
+                console.log('res', res)
+                this.$toast.success('Transfer Done Successfully')
+                await this.paginate()
+                this.receiverAccount = { name_en: '', }
+            })
         },
         async paginate()
         {
@@ -98,7 +181,9 @@ export default {
                     <td>{{ account.level_three_chart_of_account_id }}</td>
                     <td>{{ account.name_en }}</td>
                     <td>{{ account.balance }}</td>
-                    <td><button class="btn btn-success m-1">Transfer</button><button class="btn btn-primary m-1"
+                    <td><button class="btn btn-success m-1" data-bs-toggle="modal"
+                            data-bs-target="#transfer-cash-funds-model"
+                            @click="select(account)">Transfer</button><button class="btn btn-primary m-1"
                             data-bs-toggle="modal" data-bs-target="#edit-cash-account-modal"
                             @click="select(account)">Edit</button><button class="btn btn-danger m-1"
                             data-bs-toggle="modal" data-bs-target="#delete-cash-account-confirmation-modal"
@@ -198,5 +283,55 @@ export default {
             </div>
         </div>
         <!-- delete cash account confirmation modal end -->
+        <!-- Transfer transfer funds between accounts modal start -->
+        <!-- Modal -->
+        <div class="modal fade" id="transfer-cash-funds-model" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Trasnfer Funds</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row m-2">
+                            Tansfer To :
+                        </div>
+                        <div class="row m-2">
+                            <div class="col-md-12">
+                                <AutoComplete v-model="receiverAccount" :suggestions="filteredAccounts"
+                                    @complete="searchAccount($event)" :optionLabel="getAccountObjects"
+                                    inputClass="form-control" class="w-100" appendTo="self" placeholder="Choose Account"
+                                    @change="setReceiverAccount" />
+                            </div>
+                        </div>
+                        <div class="row m-2">
+                            <div class="col-md-12">
+                                <input type="text" class="form-control" placeholder="Tasnfer Desciption in English"
+                                    v-model="receiverAccount.descr_en">
+                            </div>
+                        </div>
+                        <div class="row m-2">
+                            <div class="col-md-12">
+                                <input type="text" class="form-control" placeholder="Tasnfer Desciption in Arabic"
+                                    v-model="receiverAccount.descr">
+                            </div>
+                        </div>
+                        <div class="row m-2">
+                            <div class="col-md-12">
+                                <input type="number" class="form-control" placeholder="Tasnfer Value"
+                                    v-model="receiverAccount.value" :max="account.balance" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                            @click="transfer">Transfer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Transfer transfer funds between accounts modal end -->
     </div>
 </template>
