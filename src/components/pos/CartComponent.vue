@@ -184,21 +184,21 @@ export default {
 
             // subledger
             let accountReceivableSubAccount = null
-            let unearnedRevenueSubAccount = null
+            let SalesRevenueSubAccount = null
 
             await this.http.post('subledger/searchSubAccount', { name_en: 'Accounts Receivables' }).then(res =>
             {
                 console.log('res', res)
                 accountReceivableSubAccount = res.data
             })
-            await this.http.post('subledger/searchSubAccount', { name_en: 'Unearned Revenues (Advanced Payment)' }).then(res =>
+            await this.http.post('subledger/searchSubAccount', { name_en: 'Sales Revenues' }).then(res =>
             {
                 console.log('res', res)
-                unearnedRevenueSubAccount = res.data
+                SalesRevenueSubAccount = res.data
             })
 
             console.log('accountReceivableSubAccount', accountReceivableSubAccount)
-            console.log('unearnedRevenueSubAccount', unearnedRevenueSubAccount)
+            console.log('SalesRevenueSubAccount', SalesRevenueSubAccount)
             const descr = `فاتورة مبيعات رقم ${invoice_id}`
             const descr_en = `Sales invoice No ${invoice_id}`
             let transactionObj = {
@@ -214,7 +214,7 @@ export default {
                 descr_en,
             })
             records.push({
-                account_id: unearnedRevenueSubAccount.level_three_chart_of_account_id, type: 'credit', value: transactionValue, descr,
+                account_id: SalesRevenueSubAccount.level_three_chart_of_account_id, type: 'credit', value: transactionValue, descr,
                 descr_en,
             })
 
@@ -237,9 +237,9 @@ export default {
                 descr,
                 descr_en
             }
-            let unearned_revenue_subleger_transaction = {
+            let sales_revenue_subledger_transactions = {
                 transaction_id,
-                subledger_subaccounts_id: unearnedRevenueSubAccount.id,
+                subledger_subaccounts_id: SalesRevenueSubAccount.id,
                 type: 'credit',
                 value: transactionValue,
                 descr,
@@ -250,9 +250,9 @@ export default {
             {
                 console.log('account_receivable_subleger_transaction res', res)
             })
-            await this.http.post('subledger/transactions', unearned_revenue_subleger_transaction).then(res =>
+            await this.http.post('subledger/transactions', sales_revenue_subledger_transactions).then(res =>
             {
-                console.log('unearned_revenue_subleger_transaction res', res)
+                console.log('sales_revenue_subledger_transactions res', res)
             })
 
 
