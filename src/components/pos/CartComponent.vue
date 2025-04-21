@@ -120,6 +120,7 @@ export default {
                 return;
             }
 
+            let transactionValue = this.cartTotal
             const orderDetails = this.cartProducts.map(product => ({
                 ...product,
                 product_id: product.id,
@@ -132,6 +133,7 @@ export default {
                 order_details: JSON.stringify(orderDetails),
             };
 
+            let invoice_id = 0;
             if (this.showRecipetNumberInput)
             {
                 if (!obj.recipet_number)
@@ -145,7 +147,8 @@ export default {
                     {
                         this.clearCart();
                         this.$toast.success("Payment successful");
-                        console.log(res);
+                        console.log('res after pay', res);
+                        invoice_id = res.data.id
                         this.$refs.RecipetNumberInput.value = '';
                         this.refreshOrderDetails();
                     } else
@@ -168,7 +171,8 @@ export default {
                     {
                         this.clearCart();
                         this.$toast.success("Payment successful");
-                        console.log(res);
+                        console.log('res', res);
+                        invoice_id = res.data.id
                         this.$refs.RecipetImageInput.value = null;
                         this.refreshOrderDetails();
                     } else
@@ -177,6 +181,83 @@ export default {
                     }
                 });
             }
+
+            // subledger
+            let accountReceivableSubAccount = null
+            let unearnedRevenueSubAccount = null
+
+            await this.http.post('subledger/searchSubAccount', { name_en: 'Accounts Receivables' }).then(res =>
+            {
+                console.log('res', res)
+                accountReceivableSubAccount = res.data
+            })
+            await this.http.post('subledger/searchSubAccount', { name_en: 'Unearned Revenues (Advanced Payment)' }).then(res =>
+            {
+                console.log('res', res)
+                unearnedRevenueSubAccount = res.data
+            })
+
+            console.log('accountReceivableSubAccount', accountReceivableSubAccount)
+            console.log('unearnedRevenueSubAccount', unearnedRevenueSubAccount)
+            const descr = `فاتورة مبيعات رقم ${invoice_id}`
+            const descr_en = `Sales invoice No ${invoice_id}`
+            let transactionObj = {
+                descr,
+                descr_en,
+                documents: JSON.stringify([]),
+            }
+
+            let records = [];
+
+            records.push({
+                account_id: accountReceivableSubAccount.level_three_chart_of_account_id, type: 'debit', value: transactionValue, descr,
+                descr_en,
+            })
+            records.push({
+                account_id: unearnedRevenueSubAccount.level_three_chart_of_account_id, type: 'credit', value: transactionValue, descr,
+                descr_en,
+            })
+
+            console.log(transactionObj);
+            // Normal transactions
+            let transaction_id = null
+            await this.http.post('transactions', { ...transactionObj, records: JSON.stringify(records), payToCustomer: true }).then(async res =>
+            {
+                console.log('transactions res', res)
+                transaction_id = res.data.id
+            })
+
+            // subledger transactions
+
+            let account_receivable_subleger_transaction = {
+                transaction_id,
+                subledger_subaccounts_id: accountReceivableSubAccount.id,
+                type: 'debit',
+                value: transactionValue,
+                descr,
+                descr_en
+            }
+            let unearned_revenue_subleger_transaction = {
+                transaction_id,
+                subledger_subaccounts_id: unearnedRevenueSubAccount.id,
+                type: 'credit',
+                value: transactionValue,
+                descr,
+                descr_en
+            }
+
+            await this.http.post('subledger/transactions', account_receivable_subleger_transaction).then(res =>
+            {
+                console.log('account_receivable_subleger_transaction res', res)
+            })
+            await this.http.post('subledger/transactions', unearned_revenue_subleger_transaction).then(res =>
+            {
+                console.log('unearned_revenue_subleger_transaction res', res)
+            })
+
+
+
+
         }
         ,
         clearCart()
