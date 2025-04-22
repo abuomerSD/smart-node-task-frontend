@@ -373,26 +373,37 @@ export default {
                 this.$toast.warning('Customer name is required');
                 return;
             }
-            if (!this.customer.tel)
-            {
-                this.$toast.warning('Customer Tel is required');
-                return;
-            }
-            if (!this.customer.email)
-            {
-                this.$toast.warning('Customer email is required');
-                return;
-            }
+            // if (!this.customer.tel)
+            // {
+            //     this.$toast.warning('Customer Tel is required');
+            //     return;
+            // }
+            // if (!this.customer.email)
+            // {
+            //     this.$toast.warning('Customer email is required');
+            //     return;
+            // }
             await this.http.post('customers', this.customer).then(res =>
             {
                 this.$toast.success('Customer saved successfully')
                 console.log('res', res)
                 this.customer = { name: null, tel: null, email: null }
+                return res.data.id
             })
         },
         skipCustomer()
         {
             this.isHaveCustomer = !this.isHaveCustomer
+        },
+        clearIsExistingCutomer()
+        {
+            this.selectedCustomer = null;
+            console.log('selectedCustomer', this.selectedCustomer)
+        },
+        clearIsNewCutomer()
+        {
+            this.customer = { name: null, tel: null, email: null }
+            console.log('customer', this.customer)
         },
 
     },
@@ -479,7 +490,7 @@ export default {
                     <div>
                         <div>
                             <b-tabs content-class="mt-3">
-                                <b-tab title="Existing Customer" active>
+                                <b-tab title="Existing Customer" active @click="clearIsNewCutomer">
                                     <div class="row m-2">
                                         <div class="col-lg-12">
                                             <AutoComplete v-model="selectedCustomer" :optionLabel="getCustomerLabel"
@@ -497,7 +508,7 @@ export default {
                                         </div>
                                     </div>
                                 </b-tab>
-                                <b-tab title="New Customer">
+                                <b-tab title="New Customer" @click="clearIsExistingCutomer">
                                     <div class="row m-2">
                                         <div class="col-lg-12">
                                             <input type="text" class="form-control" placeholder="Customer Name"
