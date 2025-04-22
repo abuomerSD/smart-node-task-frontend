@@ -119,7 +119,7 @@ export default {
                                 <td>{{ document.name }}</td>
                                 <!-- <td>{{ document.file }}</td> -->
                                 <td><a class="btn btn-success" :href="`${staticsUrl}${document.file}`"
-                                        :download="document.file">Download</a></td>
+                                        :download="document.file" target="_blank">Download</a></td>
                             </tr>
                         </tbody>
                     </table>

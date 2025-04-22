@@ -127,18 +127,6 @@ export default {
                 return;
             }
 
-            // payment validations
-            if (this.paymentAmount <= 0)
-            {
-                this.$toast.warning('Payment amount is required')
-                return
-            }
-            if (this.paymentAmount < this.cartTotal)
-            {
-                this.$toast.warning('Payment amount is less than total amount');
-                return;
-            }
-
             // customer validations
             if (this.isHaveCustomer && !this.selectedCustomer)
             {
@@ -152,6 +140,36 @@ export default {
             {
                 this.$toast.warning('Please Enter Recipet Number or Image')
                 return
+            }
+
+            // payment validations
+            if (this.paymentAmount <= 0)
+            {
+                this.$toast.warning('Payment amount is required')
+                return
+            }
+            // if (this.paymentAmount < this.cartTotal)
+            // {
+            //     this.$toast.warning('Payment amount is less than total amount');
+            //     return;
+            // }
+
+            if (this.paymentAmount > this.cartTotal)
+            {
+                this.$toast.warning('Payment amount is greater than total amount');
+                return;
+            }
+
+            if (this.isHaveCustomer && !this.selectedCustomer && this.this.paymentAmount < this.cartTotal)
+            {
+                this.$toast.warning('Only Customers can pay less than total amount');
+                return;
+            }
+
+            if (!this.isHaveCustomer && !this.selectedCustomer && this.paymentAmount < this.cartTotal)
+            {
+                this.$toast.warning('Only Customers can pay less than total amount');
+                return;
             }
 
             let transactionValue = this.paymentAmount
@@ -376,10 +394,7 @@ export default {
         {
             this.isHaveCustomer = !this.isHaveCustomer
         },
-        clearSelectedCustomer()
-        {
-            this.selectedCustomer = null
-        },
+
     },
     watch: {
         categoriesPage: function (val)
@@ -470,13 +485,15 @@ export default {
                                             <AutoComplete v-model="selectedCustomer" :optionLabel="getCustomerLabel"
                                                 :suggestions="filteredCustomers" @complete="searchCustomer($event)"
                                                 class="w-100" placeholder="Search Customer" inputClass="form-control"
-                                                appendTo="self" @change="clearSelectedCustomer" />
+                                                appendTo="self" :disabled="!isHaveCustomer" />
                                         </div>
                                     </div>
                                     <div class="row m-2">
                                         <div class="col-lg-12">
-                                            <button class="btn btn-secondary" @click="skipCustomer">{{ isHaveCustomer ?
-                                                'Skip' : 'Select Customer' }}</button>
+                                            <button class="btn btn-secondary" @click="skipCustomer"
+                                                :class="isHaveCustomer ? 'btn btn-danger' : 'btn btn-success'">{{
+                                                    isHaveCustomer ?
+                                                        'Skip Customer' : 'Select Customer' }}</button>
                                         </div>
                                     </div>
                                 </b-tab>
