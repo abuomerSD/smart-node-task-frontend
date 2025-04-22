@@ -1,9 +1,11 @@
 <script>
 import ProductListComponent from './ProductListComponent.vue';
+import AutoComplete from 'primevue/autocomplete';
+
 
 
 export default {
-    components: { ProductListComponent },
+    components: { ProductListComponent, AutoComplete },
     data()
     {
         return {
@@ -23,6 +25,11 @@ export default {
             showRecipetNumberInput: false,
             showRecipetImageInput: false,
             selectedCategory: null,
+            filteredCustomers: [],
+            customer: { name: null, tel: null, email: null },
+            selectedCustomer: null,
+            paymentAmount: 0,
+            isHaveCustomer: true,
         }
     },
     async mounted()
@@ -120,7 +127,34 @@ export default {
                 return;
             }
 
-            let transactionValue = this.cartTotal
+            // payment validations
+            if (this.paymentAmount <= 0)
+            {
+                this.$toast.warning('Payment amount is required')
+                return
+            }
+            if (this.paymentAmount < this.cartTotal)
+            {
+                this.$toast.warning('Payment amount is less than total amount');
+                return;
+            }
+
+            // customer validations
+            if (this.isHaveCustomer && !this.selectedCustomer)
+            {
+                this.$toast.warning('Please Select Cutomer First')
+                return
+            }
+
+            // Recipet Validations 
+
+            if (!this.$refs.RecipetNumberInput.value && !this.$refs.RecipetImageInput.value)
+            {
+                this.$toast.warning('Please Enter Recipet Number or Image')
+                return
+            }
+
+            let transactionValue = this.paymentAmount
             const orderDetails = this.cartProducts.map(product => ({
                 ...product,
                 product_id: product.id,
@@ -243,7 +277,18 @@ export default {
                 type: 'credit',
                 value: transactionValue,
                 descr,
-                descr_en
+                descr_en,
+            }
+
+            if (this.isHaveCustomer)
+            {
+
+                account_receivable_subleger_transaction.record_id = this.selectedCustomer.id
+                sales_revenue_subledger_transactions.record_id = this.selectedCustomer.id
+            } else
+            {
+                account_receivable_subleger_transaction.record_id = null
+                sales_revenue_subledger_transactions.record_id = null
             }
 
             await this.http.post('subledger/transactions', account_receivable_subleger_transaction).then(res =>
@@ -256,7 +301,9 @@ export default {
             })
 
 
-
+            this.selectedCustomer = null
+            this.paymentAmount = 0
+            this.isHaveCustomer = true
 
         }
         ,
@@ -277,6 +324,61 @@ export default {
                 product.qty--;
                 this.calculateTotals();
             }
+        },
+        getCustomerLabel(customer)
+        {
+            if (customer.name && customer.tel && customer.email)
+            {
+                return `${customer.name} - ${customer.tel} - ${customer.email}`;
+            }
+            else
+            {
+                return '';
+            }
+        },
+        async searchCustomer(event)
+        {
+
+            await this.http.post('customers/search', { search: event.query.toLowerCase() }).then(res =>
+            {
+                console.log('res', res)
+                this.filteredCustomers = res.data
+                console.log('filteredCustomers', this.filteredCustomers)
+            })
+
+        },
+        async saveCustomer()
+        {
+            // validations
+            if (!this.customer.name)
+            {
+                this.$toast.warning('Customer name is required');
+                return;
+            }
+            if (!this.customer.tel)
+            {
+                this.$toast.warning('Customer Tel is required');
+                return;
+            }
+            if (!this.customer.email)
+            {
+                this.$toast.warning('Customer email is required');
+                return;
+            }
+            await this.http.post('customers', this.customer).then(res =>
+            {
+                this.$toast.success('Customer saved successfully')
+                console.log('res', res)
+                this.customer = { name: null, tel: null, email: null }
+            })
+        },
+        skipCustomer()
+        {
+            this.isHaveCustomer = !this.isHaveCustomer
+        },
+        clearSelectedCustomer()
+        {
+            this.selectedCustomer = null
         },
     },
     watch: {
@@ -353,26 +455,95 @@ export default {
                 <button class="btn btn-danger" @click="clearCart">Clear Cart</button>
                 <!-- <button class="btn btn-primary m-3" @click="pay">Pay</button> -->
 
+
+                <!-- Pay Modal start -->
                 <b-button v-b-modal.Pay-Modal class="btn btn-primary m-3"
                     style="background-color: #02520a; color: white">Pay</b-button>
 
                 <b-modal id="Pay-Modal" title="Confirm Payment" ok-title="Pay" cancel-title="Cancel" @ok="pay">
                     <div>
-                        <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
+                        <div>
+                            <b-tabs content-class="mt-3">
+                                <b-tab title="Existing Customer" active>
+                                    <div class="row m-2">
+                                        <div class="col-lg-12">
+                                            <AutoComplete v-model="selectedCustomer" :optionLabel="getCustomerLabel"
+                                                :suggestions="filteredCustomers" @complete="searchCustomer($event)"
+                                                class="w-100" placeholder="Search Customer" inputClass="form-control"
+                                                appendTo="self" @change="clearSelectedCustomer" />
+                                        </div>
+                                    </div>
+                                    <div class="row m-2">
+                                        <div class="col-lg-12">
+                                            <button class="btn btn-secondary" @click="skipCustomer">{{ isHaveCustomer ?
+                                                'Skip' : 'Select Customer' }}</button>
+                                        </div>
+                                    </div>
+                                </b-tab>
+                                <b-tab title="New Customer">
+                                    <div class="row m-2">
+                                        <div class="col-lg-12">
+                                            <input type="text" class="form-control" placeholder="Customer Name"
+                                                v-model="customer.name">
+                                        </div>
+                                    </div>
+                                    <div class="row m-2">
+                                        <div class="col-lg-12">
+                                            <input type="text" class="form-control" placeholder="Customer Tel"
+                                                v-model="customer.tel">
+                                        </div>
+                                    </div>
+                                    <div class="row m-2">
+                                        <div class="col-lg-12">
+                                            <input type="text" class="form-control" placeholder="Customer Email"
+                                                v-model="customer.email">
+                                        </div>
+                                    </div>
+                                    <div class="row m-2">
+                                        <div class="col-lg-12">
+                                            <button class="btn btn-success" @click="saveCustomer">Save</button>
+                                        </div>
+                                    </div>
+                                </b-tab>
+                            </b-tabs>
+                        </div>
+                        <hr>
+                        <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }" class="m-2">
                             <b-form-radio @click="toggleRecipetNumber" :aria-describedby="ariaDescribedby"
                                 name="some-radios" value="A">Pay Using Recipet Number</b-form-radio>
                             <b-form-radio @click="toggleRecipetImage" :aria-describedby="ariaDescribedby"
                                 name="some-radios" value="B">Pay Using Recipet Image</b-form-radio>
                         </b-form-group>
                     </div>
-                    <div v-show="showRecipetNumberInput" class="m-2">
-                        <input type="text" placeholder="Recipet Number" class="form-control" ref="RecipetNumberInput">
+                    <div class="row">
+                        <div v-show="showRecipetNumberInput" class="m-2 col-lg-12">
+                            <input type="text" placeholder="Recipet Number" class="form-control"
+                                ref="RecipetNumberInput">
+                        </div>
                     </div>
-                    <div v-show="showRecipetImageInput" class="m-2">
-                        <input type="File" plceholder="Recipet Image" class="form-control" ref="RecipetImageInput">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div v-show="showRecipetImageInput" class="m-2">
+                                <input type="File" plceholder="Recipet Image" class="form-control"
+                                    ref="RecipetImageInput">
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row m-2">
+                        <strong>Invoice Total: ${{ cartTotal }}</strong>
+                    </div>
+                    <hr>
+                    <div class="row m-2">Payment Amount</div>
+                    <div class="row m-2">
+                        <div class="col-lg-6">
+                            <input type="number" class="form-control" placeholder="Amount" v-model="paymentAmount"
+                                min="1">
+                        </div>
+                        <div class="col-lg-6"></div>
                     </div>
                 </b-modal>
-
+                <!-- Pay Modal end -->
             </div>
         </div>
         <!-- Invoice End -->
