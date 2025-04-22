@@ -56,7 +56,7 @@ export default {
                 await this.paginate()
             })
         },
-        async delete()
+        async deleteCustomer()
         {
             await this.http.delete('customers', this.customer.id).then(async res =>
             {
@@ -64,6 +64,10 @@ export default {
                 this.$toast.success('Customer Deleted Successfully')
                 await this.paginate()
             })
+        },
+        clearCustomer()
+        {
+            this.customer = {}
         },
     },
     async mounted()
@@ -84,8 +88,8 @@ export default {
         <PageHeader title="Customers" pageTitle="Utility" />
         <div class="row">
             <div class="col-lg-11"></div>
-            <div class="col-lg-1"><a href="javascript:void(0)" data-bs-toggle="modal"
-                    data-bs-target="#addCustomerModal"><i class="bx bx-plus-medical bx-sm"></i></a></div>
+            <div class="col-lg-1"><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#addCustomerModal"
+                    @click="clearCustomer"><i class="bx bx-plus-medical bx-sm"></i></a></div>
         </div>
         <div class="row">
             <div class="table-responsive">
@@ -208,7 +212,7 @@ export default {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-danger" @click="save"
+                        <button type="button" class="btn btn-danger" @click="deleteCustomer"
                             data-bs-dismiss="modal">Delete</button>
                     </div>
                 </div>
