@@ -30,6 +30,7 @@ export default {
             selectedCustomer: null,
             paymentAmount: 0,
             isHaveCustomer: true,
+            isNewCustomer: false,
         }
     },
     async mounted()
@@ -128,11 +129,41 @@ export default {
             }
 
             // customer validations
-            if (this.isHaveCustomer && !this.selectedCustomer)
+            if (!this.selectedCustomer && !this.customer.name && this.isHaveCustomer)
             {
-                this.$toast.warning('Please Select Cutomer First')
+                this.$toast.warning('Customer is required');
+                return;
+            }
+
+            if (this.isHaveCustomer && !this.selectedCustomer && !this.customer.name)
+            {
+                this.$toast.warning('Please Select Customer First')
                 return
             }
+
+            if (this.isNewCustomer && this.paymentAmount !== this.cartTotal)
+            {
+                this.$toast.warning('Uncorrect Payment value')
+                return
+            }
+
+
+            if (this.isNewCustomer && !this.selectedCustomer)
+            {
+
+                await this.http.post('customers', this.customer).then(res =>
+                {
+                    this.$toast.success('Customer saved successfully')
+                    console.log('res', res)
+                    this.selectedCustomer = res.data
+                    this.customer = { name: null, tel: null, email: null }
+                    console.log('saved selectedCustomer', this.selectedCustomer)
+
+                })
+                // console.log('customer : ', this.customer)
+                // this.selectedCustomer = await this.saveCustomer();
+            }
+
 
             // Recipet Validations 
 
@@ -160,7 +191,7 @@ export default {
                 return;
             }
 
-            if (this.isHaveCustomer && !this.selectedCustomer && this.this.paymentAmount < this.cartTotal)
+            if (this.isHaveCustomer && !this.selectedCustomer && this.paymentAmount < this.cartTotal)
             {
                 this.$toast.warning('Only Customers can pay less than total amount');
                 return;
@@ -172,7 +203,7 @@ export default {
                 return;
             }
 
-            let transactionValue = this.paymentAmount
+            // let transactionValue = this.paymentAmount
             const orderDetails = this.cartProducts.map(product => ({
                 ...product,
                 product_id: product.id,
@@ -183,9 +214,12 @@ export default {
                 recipet_number: this.showRecipetNumberInput ? this.$refs.RecipetNumberInput.value : null,
                 file: this.showRecipetImageInput ? this.$refs.RecipetImageInput.files[0] : null,
                 order_details: JSON.stringify(orderDetails),
+                cartTotal: this.cartTotal,
+                paymentValue: this.paymentAmount,
+                customer: this.selectedCustomer,
             };
 
-            let invoice_id = 0;
+            // let invoice_id = 0;
             if (this.showRecipetNumberInput)
             {
                 if (!obj.recipet_number)
@@ -200,7 +234,7 @@ export default {
                         this.clearCart();
                         this.$toast.success("Payment successful");
                         console.log('res after pay', res);
-                        invoice_id = res.data.id
+                        // invoice_id = res.data.id
                         this.$refs.RecipetNumberInput.value = '';
                         this.refreshOrderDetails();
                     } else
@@ -212,6 +246,11 @@ export default {
 
             if (this.showRecipetImageInput)
             {
+                if (!obj.customer.name)
+                {
+                    this.$toast.error('customer not selected')
+                    return
+                }
                 if (this.$refs.RecipetImageInput.files.length === 0)
                 {
                     this.$toast.warning("Recipet Image is required");
@@ -224,7 +263,8 @@ export default {
                         this.clearCart();
                         this.$toast.success("Payment successful");
                         console.log('res', res);
-                        invoice_id = res.data.id
+                        console.log('customer', this.obj.customer);
+                        // invoice_id = res.data.id
                         this.$refs.RecipetImageInput.value = null;
                         this.refreshOrderDetails();
                     } else
@@ -235,88 +275,88 @@ export default {
             }
 
             // subledger
-            let accountReceivableSubAccount = null
-            let SalesRevenueSubAccount = null
+            // let accountReceivableSubAccount = null
+            // let SalesRevenueSubAccount = null
 
-            await this.http.post('subledger/searchSubAccount', { name_en: 'Accounts Receivables' }).then(res =>
-            {
-                console.log('res', res)
-                accountReceivableSubAccount = res.data
-            })
-            await this.http.post('subledger/searchSubAccount', { name_en: 'Sales Revenues' }).then(res =>
-            {
-                console.log('res', res)
-                SalesRevenueSubAccount = res.data
-            })
+            // await this.http.post('subledger/searchSubAccount', { name_en: 'Accounts Receivables' }).then(res =>
+            // {
+            //     console.log('res', res)
+            //     accountReceivableSubAccount = res.data
+            // })
+            // await this.http.post('subledger/searchSubAccount', { name_en: 'Sales Revenues' }).then(res =>
+            // {
+            //     console.log('res', res)
+            //     SalesRevenueSubAccount = res.data
+            // })
 
-            console.log('accountReceivableSubAccount', accountReceivableSubAccount)
-            console.log('SalesRevenueSubAccount', SalesRevenueSubAccount)
-            const descr = `فاتورة مبيعات رقم ${invoice_id}`
-            const descr_en = `Sales invoice No ${invoice_id}`
-            let transactionObj = {
-                descr,
-                descr_en,
-                documents: JSON.stringify([]),
-            }
+            // console.log('accountReceivableSubAccount', accountReceivableSubAccount)
+            // console.log('SalesRevenueSubAccount', SalesRevenueSubAccount)
+            // const descr = `فاتورة مبيعات رقم ${invoice_id}`
+            // const descr_en = `Sales invoice No ${invoice_id}`
+            // let transactionObj = {
+            //     descr,
+            //     descr_en,
+            //     documents: JSON.stringify([]),
+            // }
 
-            let records = [];
+            // let records = [];
 
-            records.push({
-                account_id: accountReceivableSubAccount.level_three_chart_of_account_id, type: 'debit', value: transactionValue, descr,
-                descr_en,
-            })
-            records.push({
-                account_id: SalesRevenueSubAccount.level_three_chart_of_account_id, type: 'credit', value: transactionValue, descr,
-                descr_en,
-            })
+            // records.push({
+            //     account_id: accountReceivableSubAccount.level_three_chart_of_account_id, type: 'debit', value: transactionValue, descr,
+            //     descr_en,
+            // })
+            // records.push({
+            //     account_id: SalesRevenueSubAccount.level_three_chart_of_account_id, type: 'credit', value: transactionValue, descr,
+            //     descr_en,
+            // })
 
-            console.log(transactionObj);
-            // Normal transactions
-            let transaction_id = null
-            await this.http.post('transactions', { ...transactionObj, records: JSON.stringify(records), payToCustomer: true }).then(async res =>
-            {
-                console.log('transactions res', res)
-                transaction_id = res.data.id
-            })
+            // console.log(transactionObj);
+            // // Normal transactions
+            // let transaction_id = null
+            // await this.http.post('transactions', { ...transactionObj, records: JSON.stringify(records), payToCustomer: true }).then(async res =>
+            // {
+            //     console.log('transactions res', res)
+            //     transaction_id = res.data.id
+            // })
 
             // subledger transactions
 
-            let account_receivable_subleger_transaction = {
-                transaction_id,
-                subledger_subaccounts_id: accountReceivableSubAccount.id,
-                type: 'debit',
-                value: transactionValue,
-                descr,
-                descr_en
-            }
-            let sales_revenue_subledger_transactions = {
-                transaction_id,
-                subledger_subaccounts_id: SalesRevenueSubAccount.id,
-                type: 'credit',
-                value: transactionValue,
-                descr,
-                descr_en,
-            }
+            // let account_receivable_subleger_transaction = {
+            //     transaction_id,
+            //     subledger_subaccounts_id: accountReceivableSubAccount.id,
+            //     type: 'debit',
+            //     value: transactionValue,
+            //     descr,
+            //     descr_en
+            // }
+            // let sales_revenue_subledger_transactions = {
+            //     transaction_id,
+            //     subledger_subaccounts_id: SalesRevenueSubAccount.id,
+            //     type: 'credit',
+            //     value: transactionValue,
+            //     descr,
+            //     descr_en,
+            // }
 
-            if (this.isHaveCustomer)
-            {
+            // if (this.isHaveCustomer)
+            // {
 
-                account_receivable_subleger_transaction.record_id = this.selectedCustomer.id
-                sales_revenue_subledger_transactions.record_id = this.selectedCustomer.id
-            } else
-            {
-                account_receivable_subleger_transaction.record_id = null
-                sales_revenue_subledger_transactions.record_id = null
-            }
+            //     account_receivable_subleger_transaction.record_id = this.selectedCustomer.id
+            //     sales_revenue_subledger_transactions.record_id = this.selectedCustomer.id
+            // } else
+            // {
+            //     account_receivable_subleger_transaction.record_id = null
+            //     sales_revenue_subledger_transactions.record_id = null
+            // }
 
-            await this.http.post('subledger/transactions', account_receivable_subleger_transaction).then(res =>
-            {
-                console.log('account_receivable_subleger_transaction res', res)
-            })
-            await this.http.post('subledger/transactions', sales_revenue_subledger_transactions).then(res =>
-            {
-                console.log('sales_revenue_subledger_transactions res', res)
-            })
+            // await this.http.post('subledger/transactions', account_receivable_subleger_transaction).then(res =>
+            // {
+            //     console.log('account_receivable_subleger_transaction res', res)
+            // })
+            // await this.http.post('subledger/transactions', sales_revenue_subledger_transactions).then(res =>
+            // {
+            //     console.log('sales_revenue_subledger_transactions res', res)
+            // })
 
 
             this.selectedCustomer = null
@@ -347,7 +387,7 @@ export default {
         {
             if (customer.name && customer.tel && customer.email)
             {
-                return `${customer.name} - ${customer.tel} - ${customer.email}`;
+                return `${customer.name} - ${customer.tel ? customer.tel : 'No Tel'} - ${customer.email ? customer.email : 'No Email'}`;
             }
             else
             {
@@ -388,7 +428,7 @@ export default {
                 this.$toast.success('Customer saved successfully')
                 console.log('res', res)
                 this.customer = { name: null, tel: null, email: null }
-                return res.data.id
+                return res.data
             })
         },
         skipCustomer()
@@ -399,11 +439,14 @@ export default {
         {
             this.selectedCustomer = null;
             console.log('selectedCustomer', this.selectedCustomer)
+            this.isNewCustomer = true
+            // this.ishaveCustomer = false
         },
         clearIsNewCutomer()
         {
             this.customer = { name: null, tel: null, email: null }
             console.log('customer', this.customer)
+            this.isNewCustomer = false
         },
 
     },
@@ -480,7 +523,7 @@ export default {
                 <h5>Total: {{ cartTotal }}$</h5>
                 <button class="btn btn-danger" @click="clearCart">Clear Cart</button>
                 <!-- <button class="btn btn-primary m-3" @click="pay">Pay</button> -->
-                
+
                 <!-- Pay Modal start -->
                 <b-button v-b-modal.Pay-Modal class="btn btn-primary m-3"
                     style="background-color: #02520a; color: white">Pay</b-button>
@@ -489,13 +532,14 @@ export default {
                     <div>
                         <div>
                             <b-tabs content-class="mt-3">
-                                <b-tab title="Existing Customer" active @click="clearIsNewCutomer">
+                                <b-tab title="Existing Customer" active>
                                     <div class="row m-2">
                                         <div class="col-lg-12">
                                             <AutoComplete v-model="selectedCustomer" :optionLabel="getCustomerLabel"
                                                 :suggestions="filteredCustomers" @complete="searchCustomer($event)"
                                                 class="w-100" placeholder="Search Customer" inputClass="form-control"
-                                                appendTo="self" :disabled="!isHaveCustomer" />
+                                                appendTo="self" :disabled="!isHaveCustomer"
+                                                @change="clearIsNewCutomer" />
                                         </div>
                                     </div>
                                     <div class="row m-2">
@@ -507,11 +551,11 @@ export default {
                                         </div>
                                     </div>
                                 </b-tab>
-                                <b-tab title="New Customer" @click="clearIsExistingCutomer">
+                                <b-tab title="New Customer">
                                     <div class="row m-2">
                                         <div class="col-lg-12">
                                             <input type="text" class="form-control" placeholder="Customer Name"
-                                                v-model="customer.name">
+                                                v-model="customer.name" @input="clearIsExistingCutomer">
                                         </div>
                                     </div>
                                     <div class="row m-2">
@@ -526,11 +570,11 @@ export default {
                                                 v-model="customer.email">
                                         </div>
                                     </div>
-                                    <div class="row m-2">
+                                    <!-- <div class="row m-2">
                                         <div class="col-lg-12">
                                             <button class="btn btn-success" @click="saveCustomer">Save</button>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </b-tab>
                             </b-tabs>
                         </div>

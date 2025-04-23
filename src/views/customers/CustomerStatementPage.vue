@@ -54,7 +54,7 @@ export default {
                     <th scope="row">Transaction id</th>
                     <th scope="row">Debit</th>
                     <th scope="row">Credit</th>
-                    <th scope="row">Transaction Value</th>
+                    <th scope="row">Account Name</th>
                     <th scope="row">Description</th>
                 </tr>
             </thead>
@@ -63,9 +63,9 @@ export default {
                     <th scope="row">{{ index + 1 }}</th>
                     <td>{{ new Date(transaction.created).toLocaleDateString() }}</td>
                     <td>{{ transaction.id }}</td>
-                    <td>{{ transaction.type }}</td>
                     <td>{{ transaction.type === 'debit' ? transaction.value : 0 }}</td>
                     <td>{{ transaction.type === 'credit' ? transaction.value : 0 }}</td>
+                    <td>{{ transaction.subledger_subaccount.name_en }}</td>
                     <td>{{ transaction.descr_en }}</td>
                 </tr>
             </tbody>
