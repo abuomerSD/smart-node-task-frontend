@@ -101,8 +101,10 @@ export default {
                             <th scope="row">Customer Name</th>
                             <th scope="row">Customer Tel</th>
                             <th scope="row">Customer Email</th>
+                            <th scope="row">Balance</th>
+                            <th scope="row">Statement</th>
                             <th scope="row">Created</th>
-                            <th scope="row">Updated</th>
+                            <!-- <th scope="row">Updated</th> -->
                             <th scope="row">Actions</th>
                         </tr>
                     </thead>
@@ -113,12 +115,17 @@ export default {
                             <td>{{ customer.name }}</td>
                             <td>{{ customer.tel }}</td>
                             <td>{{ customer.email }}</td>
+                            <td>{{ customer.balance }}</td>
+                            <td><router-link :to="{ name: 'customers-statement', params: { id: customer.id } }"><i
+                                        class="bx bx-info-circle bx-sm"></i></router-link></td>
                             <td>{{ new Date(customer.created).toLocaleDateString() }}</td>
-                            <td>{{ new Date(customer.updated).toLocaleDateString() }}</td>
-                            <td><button class="btn btn-primary m-1" @click="select(customer)" data-bs-toggle="modal"
-                                    data-bs-target="#updateCustomerModal">Edit</button><button
-                                    class="btn btn-danger m-1" @click="select(customer)" data-bs-toggle="modal"
-                                    data-bs-target="#deleteCustomerModal">Delete</button></td>
+                            <!-- <td>{{ new Date(customer.updated).toLocaleDateString() }}</td> -->
+                            <td><a href="javascript:void(0)" @click="select(customer)" data-bs-toggle="modal"
+                                    data-bs-target="#updateCustomerModal"><i class="bx bxs-edit bx-sm"></i></a>
+                                <a href="javascript:void(0)" @click="select(customer)" data-bs-toggle="modal"
+                                    data-bs-target="#deleteCustomerModal"><i
+                                        class="bx bx-trash bx-sm text-danger"></i></a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

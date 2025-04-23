@@ -480,8 +480,7 @@ export default {
                 <h5>Total: {{ cartTotal }}$</h5>
                 <button class="btn btn-danger" @click="clearCart">Clear Cart</button>
                 <!-- <button class="btn btn-primary m-3" @click="pay">Pay</button> -->
-
-
+                
                 <!-- Pay Modal start -->
                 <b-button v-b-modal.Pay-Modal class="btn btn-primary m-3"
                     style="background-color: #02520a; color: white">Pay</b-button>
