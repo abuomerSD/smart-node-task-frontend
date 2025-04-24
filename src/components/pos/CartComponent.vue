@@ -141,11 +141,11 @@ export default {
                 return
             }
 
-            if (this.isNewCustomer && this.paymentAmount !== this.cartTotal)
-            {
-                this.$toast.warning('Uncorrect Payment value')
-                return
-            }
+            // if (this.isNewCustomer && this.paymentAmount !== this.cartTotal)
+            // {
+            //     this.$toast.warning('Uncorrect Payment value')
+            //     return
+            // }
 
 
             if (this.isNewCustomer && !this.selectedCustomer)
@@ -216,7 +216,7 @@ export default {
                 order_details: JSON.stringify(orderDetails),
                 cartTotal: this.cartTotal,
                 paymentValue: this.paymentAmount,
-                customer: this.selectedCustomer,
+                customer: JSON.stringify(this.selectedCustomer),
             };
 
             // let invoice_id = 0;
@@ -246,11 +246,11 @@ export default {
 
             if (this.showRecipetImageInput)
             {
-                if (!obj.customer.name)
-                {
-                    this.$toast.error('customer not selected')
-                    return
-                }
+                // if (!obj.customer.name)
+                // {
+                //     this.$toast.error('customer not selected')
+                //     return
+                // }
                 if (this.$refs.RecipetImageInput.files.length === 0)
                 {
                     this.$toast.warning("Recipet Image is required");
@@ -263,7 +263,7 @@ export default {
                         this.clearCart();
                         this.$toast.success("Payment successful");
                         console.log('res', res);
-                        console.log('customer', this.obj.customer);
+                        // console.log('customer', this.obj.customer);
                         // invoice_id = res.data.id
                         this.$refs.RecipetImageInput.value = null;
                         this.refreshOrderDetails();

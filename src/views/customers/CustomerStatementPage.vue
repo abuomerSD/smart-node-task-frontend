@@ -2,9 +2,6 @@
 import Layout from "../../layouts/main";
 import PageHeader from "@/components/page-header";
 
-/**
- * Starter component
- */
 export default {
     components: { Layout, PageHeader },
     data()
@@ -14,15 +11,19 @@ export default {
             balance: 0,
             id: this.$route.params.id,
             customer: { name: null },
+            page: 1,
+            limit: 2,
+            tot: 0,
         }
     },
     methods: {
         async getTransactions()
         {
-            await this.http.get(`customers/statement/${this.id}/`).then(res =>
+            await this.http.get(`customers/statement/${this.id}`, { limit: this.limit, page: this.page }).then(res =>
             {
                 this.transactions = res.data
                 this.balance = res.balance
+                this.tot = res.tot
             })
         },
         async getCutomer()
@@ -37,6 +38,12 @@ export default {
     {
         await this.getTransactions()
         await this.getCutomer()
+    },
+    watch: {
+        page: async function ()
+        {
+            await this.getTransactions()
+        }
     }
 };
 </script>
@@ -81,5 +88,7 @@ export default {
                 </tr>
             </tfoot>
         </table>
+        <b-pagination v-if="tot > limit" v-model="page" :total-rows="tot" :per-page="limit"
+            aria-controls="my-table"></b-pagination>
     </Layout>
 </template>
